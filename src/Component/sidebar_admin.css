@@ -1,0 +1,52 @@
+/* styles.css */
+
+/* Sidebar styles for screens larger than 768px */
+.Box {
+    width: 240px;
+    transition: width 0.3s;
+  }
+  
+  /* Sidebar styles for screens smaller than 768px */
+  @media (max-width: 768px) {
+    .Box {
+      width: 80px;
+    }
+  
+    /* Hide text in menu items */
+    .ListItemText {
+      display: none;
+    }
+  
+    /* Show icons only */
+    .ListItemIcon {
+      margin-right: 0;
+    }
+  
+    /* Adjust padding and icon size for collapsed menu items */
+    .ListItem.sx-py-2 {
+      padding: 10px;
+    }
+  
+    /* Hide submenu icons */
+    .ExpandLess, .ExpandMore {
+      display: none;
+    }
+  
+    /* Show submenu items in a column */
+    .Collapse > .List {
+      flex-direction: column;
+    }
+  
+    /* Adjust padding for submenu items */
+    .Collapse .ListItem {
+      padding-left: 15px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+  
+    /* Hide logout button text */
+    .Button span {
+      display: none;
+    }
+  }
+  

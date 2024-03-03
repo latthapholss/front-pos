@@ -1,0 +1,16 @@
+/* เพิ่มสไตล์สำหรับหน้าจอที่กว้าง 768px ขึ้นไป */
+@media (min-width: 768px) {
+    .main-container {
+      display: flex;
+      /* ตั้งค่าให้แสดงเป็นแถวแนวนอนเมื่อหน้าจอกว้างขึ้น */
+      flex-direction: row;
+    }
+  
+    .category-container{
+      margin-left: 240px !important;  
+    }
+    .unit-container {
+      width: 50%; /* แบ่งพื้นที่เป็น 2 ส่วนเมื่อหน้าจอกว้างขึ้น */
+    }
+  }
+  

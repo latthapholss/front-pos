@@ -1,0 +1,5 @@
+/* Custom styles for SweetAlert popups */
+.custom-sweetalert-popup {
+    z-index: 9999 !important; /* Set a higher value to make it appear above other dialogs */
+  }
+  

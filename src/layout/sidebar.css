@@ -1,0 +1,20 @@
+a:hover {
+    background-color:  #c5e4fe
+    !important;
+    color: black ; /* สีตัวอักษรเมื่อ hover */
+
+  }
+  .menu:hover {
+    background-color:  #c5e4fe
+    !important;
+    color: white ; /* สีตัวอักษรเมื่อ hover */
+
+  }
+  .aa{
+    color: #009ae1
+    ;
+  }
+  .bb{
+    color: black;
+  }
+  

@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap');
+@media print {
+    body {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 12pt;
+      
+    }
+    th {
+        page-break-before: always;
+      }
+  }
+  
