@@ -137,3 +137,5 @@ export const EditedCategory= '/struct/update_product_type';
 //itemset
 export const getitemset='/apriori/aprioripair'
 export const gettwoproduct='/itemset/twoproduct'
+export const additemset='/itemset/additemset'
+export const getProductItemSet='/itemset'

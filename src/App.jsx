@@ -29,6 +29,7 @@ import ProductLotManage from './Lot/ProductLotManage';
 import receiptRefundDialog from './Component/receipt/receiptRefundDialog';
 import Promotionitemset from './Promotion/promotionitemset';
 import ItemsetPromotionadd from './Promotion/ItemsetPromotionadd';
+import ItemsetManage from './Promotion/ItemsetManage';
 
 
 
@@ -115,6 +116,8 @@ function App() {
                     <Route path="/admin/Lot/ProductLotManage" element={<ProductLotManage person={person} />} />
                     <Route path="/receiptRefund" element={<receiptRefundDialog />} />
                     <Route path="/promotion/promotionitemset" element={<Promotionitemset />} />
+                    <Route path="/promotion/ItemsetManage" element={<ItemsetManage />} />
+
 
                   
                   </>
@@ -139,6 +142,7 @@ function App() {
                     <Route path="/admin/Lot/ProductLotManage" element={<ProductLotManage person={person} />} />
                     <Route path="/receiptRefund" element={<receiptRefundDialog />} />
                     <Route path="/promotion/promotionitemset" element={<Promotionitemset />} />
+                    <Route path="/promotion/ItemsetManage" element={<ItemsetManage />} />
 
                     {/* <Route path="/member/member-Profile" element={<MemberProfile person={person}/>} />
               <Route path="/member/history" element={<Memberhistory person={person}/>} />
@@ -185,8 +189,7 @@ function App() {
                 {/* Route for the PromotionITEM component */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin/Lot/ProductLotManage" element={<ProductLotManage person={person} />} />
-                <Route path="/promotion/promotionitemset" element={<Promotionitemset />} />
-                <Route path="/additemset/:id1/:id2" element={<ItemsetPromotionadd person={person} />} />
+                <Route path="/promotion/ItemsetManage" element={<ItemsetManage />} />
               </Routes>
             </div>
           </main>

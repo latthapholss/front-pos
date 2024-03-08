@@ -1,21 +1,15 @@
 import React, { useState } from "react";
-import {
-  Sidebar,
-  Menu,
-  MenuItem,
-  SubMenu,
-
-} from "react-pro-sidebar";
-import { Box, IconButton, Typography,} from "@mui/material";
+import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
+import { Box, IconButton, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import "./sidebar.css";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import InventoryIcon from '@mui/icons-material/Inventory';
-import LoyaltyIcon from '@mui/icons-material/Loyalty';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import InventoryIcon from "@mui/icons-material/Inventory";
+import LoyaltyIcon from "@mui/icons-material/Loyalty";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 const SidebarAdmin = () => {
   const [isCollapsed, setisCollapsed] = useState(false);
   const [toggled, setToggled] = useState(false);
@@ -57,13 +51,15 @@ const SidebarAdmin = () => {
                     alignItems="center"
                     ml="15px"
                   >
-                    <Typography sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      fontWeight: 'bold',  // เพิ่มตัวหนา
-                      fontStyle: 'italic',  // แต่งข้อความ
-                    }}>
+                    <Typography
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        fontWeight: "bold", // เพิ่มตัวหนา
+                        fontStyle: "italic", // แต่งข้อความ
+                      }}
+                    >
                       Muangthong <br /> POS APP
                     </Typography>
                     <IconButton onClick={() => setisCollapsed(!isCollapsed)}>
@@ -93,38 +89,74 @@ const SidebarAdmin = () => {
                   </Box> */}
                 </Box>
               )}
-              <div className ="live">
-              <Link to="/admin/dashboard" className="menu-bars">
-                <MenuItem className="aa" icon={< HomeOutlinedIcon />} > <span className="bb">หน้าหลัก</span> </MenuItem>
-              </Link>
-              <Link to="/admin/cashier" className="menu-bars"  id="abc">
-                <MenuItem className="aa"icon={<ShoppingBagIcon />}  ><span className="bb">สินค้า</span></MenuItem>
-              </Link>
-              <Link to="/admin/EmployeeManagement" className="menu-bars"  id="abc">
-                <MenuItem className="aa"icon={<PeopleOutlinedIcon />}><span className="bb">จัดการข้อมูลพนักงาน</span></MenuItem>
-              </Link>
-              <Link to="/admin/membermanagement" className="menu-bars">
-                <MenuItem className="aa"icon={<PeopleOutlinedIcon />} > <span className="bb">จัดการสมาชิก</span></MenuItem>
-              </Link>
-              <SubMenu label={<span style={{ color: 'black' }}>จัดการสินค้า</span>} className="aa"icon={<InventoryIcon />}>
-                <Link to={"/admin/AdminProduct"} className="menu-bars">
-                  <MenuItem > <span className="bb">สินค้า</span></MenuItem>
+              <div className="live">
+                <Link to="/admin/dashboard" className="menu-bars">
+                  <MenuItem className="aa" icon={<HomeOutlinedIcon />}>
+                    {" "}
+                    <span className="bb">หน้าหลัก</span>{" "}
+                  </MenuItem>
                 </Link>
-                <Link  to={"/admin/AdminCategories"} className="menu-bars" >
-                  <MenuItem>ประเภท-หน่วย</MenuItem>
+                <Link to="/admin/cashier" className="menu-bars" id="abc">
+                  <MenuItem className="aa" icon={<ShoppingBagIcon />}>
+                    <span className="bb">สินค้า</span>
+                  </MenuItem>
                 </Link>
-              </SubMenu>
-              <Link to="/promotion/promotionadd" className="menu-bars">
-                <MenuItem className="aa" icon={<LoyaltyIcon />}><span className="bb">จัดการโปรโมชั่น</span></MenuItem>
-              </Link>
-              <Link to="/admin/SalesDetailPage" className="menu-bars">
-                <MenuItem className="aa" icon={<ReceiptIcon />}><span className="bb">ข้อมูลการขาย</span></MenuItem>
-              </Link>
+                <Link
+                  to="/admin/EmployeeManagement"
+                  className="menu-bars"
+                  id="abc"
+                >
+                  <MenuItem className="aa" icon={<PeopleOutlinedIcon />}>
+                    <span className="bb">จัดการข้อมูลพนักงาน</span>
+                  </MenuItem>
+                </Link>
+                <Link to="/admin/membermanagement" className="menu-bars">
+                  <MenuItem className="aa" icon={<PeopleOutlinedIcon />}>
+                    {" "}
+                    <span className="bb">จัดการสมาชิก</span>
+                  </MenuItem>
+                </Link>
+                <SubMenu
+                  label={<span style={{ color: "black" }}>จัดการสินค้า</span>}
+                  className="aa"
+                  icon={<InventoryIcon />}
+                >
+                  <Link to={"/admin/AdminProduct"} className="menu-bars">
+                    <MenuItem>
+                      {" "}
+                      <span className="bb">สินค้า</span>
+                    </MenuItem>
+                  </Link>
+                  <Link to={"/admin/AdminCategories"} className="menu-bars">
+                    <MenuItem>ประเภท-หน่วย</MenuItem>
+                  </Link>
+                </SubMenu>
+                <SubMenu
+                  label={
+                    <span style={{ color: "black" }}>จัดการโปรโมชัน</span>
+                  }
+                  className="aa"
+                  icon={<LoyaltyIcon />}
+                >
+                  <Link to="/promotion/promotionadd" className="menu-bars">
+                    <MenuItem className="aa" icon={<LoyaltyIcon />}>
+                      <span className="bb">โปรโมชัน</span>
+                    </MenuItem>
+                  </Link>
+                  <Link to={"/promotion/ItemsetManage"} className="menu-bars">
+                    <MenuItem className="aa" icon={<ShoppingBagIcon />}>
+                      <span className="bb">ชุดสินค้า</span>
+                    </MenuItem>
+                  </Link>
+                </SubMenu>
+
+                <Link to="/admin/SalesDetailPage" className="menu-bars">
+                  <MenuItem className="aa" icon={<ReceiptIcon />}>
+                    <span className="bb">ข้อมูลการขาย</span>
+                  </MenuItem>
+                </Link>
               </div>
             </Menu>
-
-
-           
           </div>
         </div>
       </Sidebar>
