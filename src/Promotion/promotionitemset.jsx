@@ -19,6 +19,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { getitemset, ip } from '../Static/api';
 
 export default function PromotionItemSet() {
     const navigate = useNavigate();
@@ -40,7 +41,7 @@ export default function PromotionItemSet() {
             redirect: "follow"
         };
 
-        fetch("http://localhost:4000/api/v1/apriori/aprioripair", requestOptions)
+        fetch(ip + getitemset, requestOptions) // เปลี่ยนจาก "ip+getitemset" เป็น ip + getitemset
             .then(response => response.json())
             .then(result => {
                 console.log(result); // แสดงค่า result ใน console เพื่อตรวจสอบ
@@ -64,10 +65,11 @@ export default function PromotionItemSet() {
     const indexOfFirstItem = (currentPage - 1) * rowsPerPage;
     const indexOfLastItem = currentPage * rowsPerPage;
 
-    const handleCreateProduct = (index) => {
-        // ทำสิ่งที่คุณต้องการเมื่อคลิกที่ปุ่ม "สร้างสินค้า" ของแถวที่กำหนด
-        // ตัวอย่าง: การนำ index ไปใช้เพื่อดึงข้อมูลสินค้าที่เกี่ยวข้องหรือทำการสร้างหน้าใหม่เพื่อสร้างสินค้า
-        console.log("Creating product for row index:", index);
+    const handleCreateProduct = (productId1, productId2) => {
+        // ทำการสร้าง URL ด้วย template literals โดยระบุ product_id_1 และ product_id_2
+        const url = `/additemset/${productId1}/${productId2}`;
+        // ใช้ navigate เพื่อเปลี่ยนเส้นทางไปยัง URL ที่กำหนด
+        navigate(url);
     };
 
     const handleGoBack = () => {
@@ -95,8 +97,8 @@ export default function PromotionItemSet() {
             </Box>
             <Button startIcon={<ArrowBackIcon />} color="primary" onClick={handleGoBack} >
 
-ย้อนกลับ
-</Button>
+                ย้อนกลับ
+            </Button>
 
             <Box sx={{ margin: '15px', backgroundColor: 'white', height: '1100px', borderRadius: 3, padding: '20px' }}>
                 <Box component="main">
@@ -140,7 +142,12 @@ export default function PromotionItemSet() {
                                                 <TableCell>{item.product_name2}</TableCell>
                                                 <TableCell>
                                                     {/* เพิ่มปุ่มสร้างสินค้า */}
-                                                    <Button variant="contained" color="primary" onClick={() => handleCreateProduct(index)}>
+
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={() => handleCreateProduct(item.product_id_1, item.product_id_2)}
+                                                    >
                                                         สร้าง
                                                     </Button>
                                                 </TableCell>
