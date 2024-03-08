@@ -73,7 +73,7 @@ export default function PromotionItemSet() {
     };
 
     const handleGoBack = () => {
-        navigate('/promotion/promotionadd')
+        navigate('/promotion/ItemsetManage')
     };
 
     return (

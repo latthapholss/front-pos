@@ -9,7 +9,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import ReceiptIcon from '@mui/icons-material/Receipt';
+import ReceiptIcon from "@mui/icons-material/Receipt";
 
 const SidebarEmployeee = () => {
   const [isCollapsed, setisCollapsed] = useState(false);
@@ -90,28 +90,50 @@ const SidebarEmployeee = () => {
                   </Box> */}
                 </Box>
               )}
-                <Link to="/admin/dashboard" className="menu-bars">
-                <MenuItem className="aa" icon={<HomeOutlinedIcon />} > <span className="bb">หน้าหลัก</span> </MenuItem>
+              <Link to="/admin/dashboard" className="menu-bars">
+                <MenuItem className="aa" icon={<HomeOutlinedIcon />}>
+                  {" "}
+                  <span className="bb">หน้าหลัก</span>{" "}
+                </MenuItem>
               </Link>
-              <Link to="/admin/cashier" className="menu-bars"  id="abc">
-                <MenuItem className="aa"icon={<ShoppingBagIcon />}  ><span className="bb">สินค้า</span></MenuItem>
+              <Link to="/admin/cashier" className="menu-bars" id="abc">
+                <MenuItem className="aa" icon={<ShoppingBagIcon />}>
+                  <span className="bb">สินค้า</span>
+                </MenuItem>
               </Link>
               <Link to="/admin/membermanagement" className="menu-bars">
-                <MenuItem className="aa"icon={<PeopleOutlinedIcon />} > <span className="bb">จัดการสมาชิก</span></MenuItem>
+                <MenuItem className="aa" icon={<PeopleOutlinedIcon />}>
+                  {" "}
+                  <span className="bb">จัดการสมาชิก</span>
+                </MenuItem>
               </Link>
-              <SubMenu label={<span style={{ color: 'black' }}>จัดการสินค้า</span>} className="aa"icon={<InventoryIcon />}>
-                <Link to={"/admin/AdminProduct"} className="menu-bars">
-                  <MenuItem > <span className="bb">สินค้า</span></MenuItem>
+              <SubMenu
+                label={
+                  <span style={{ color: "black" }}>จัดการโปรโมชัน</span>
+                }
+                className="aa"
+                icon={<LoyaltyIcon />}
+              >
+                <Link to="/promotion/promotionadd" className="menu-bars">
+                  <MenuItem className="aa" icon={<LoyaltyIcon />}>
+                    <span className="bb">โปรโมชัน</span>
+                  </MenuItem>
                 </Link>
-                <Link  to={"/admin/AdminCategories"} className="menu-bars" >
-                  <MenuItem>ประเภท-หน่วย</MenuItem>
+                <Link to={"/promotion/ItemsetManage"} className="menu-bars">
+                  <MenuItem className="aa" icon={<ShoppingBagIcon />}>
+                    <span className="bb">ชุดสินค้า</span>
+                  </MenuItem>
                 </Link>
               </SubMenu>
               <Link to="/promotion/promotionadd" className="menu-bars">
-                <MenuItem className="aa" icon={<LoyaltyIcon />}><span className="bb">จัดการโปรโมชั่น</span></MenuItem>
+                <MenuItem className="aa" icon={<LoyaltyIcon />}>
+                  <span className="bb">จัดการโปรโมชั่น</span>
+                </MenuItem>
               </Link>
               <Link to="/admin/SalesDetailPage" className="menu-bars">
-                <MenuItem className="aa" icon={<ReceiptIcon />}><span className="bb">ข้อมูลการขาย</span></MenuItem>
+                <MenuItem className="aa" icon={<ReceiptIcon />}>
+                  <span className="bb">ข้อมูลการขาย</span>
+                </MenuItem>
               </Link>
             </Menu>
           </div>
