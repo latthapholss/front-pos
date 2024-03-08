@@ -22,6 +22,7 @@ import {
 import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { ADD_EMPLOYEE, DELETEEMPLOYEE, GETEMPLOYEE, UPDATE_EMPLOYEE, get, post } from '../Static/api';
 import Swal from 'sweetalert2';
+import { message } from 'antd';
 
 function EmployeeManagement({ person }) {
     const [employees, setEmployees] = useState([]);
@@ -73,8 +74,18 @@ function EmployeeManagement({ person }) {
 
     const handleSaveEmployee = async () => {
         try {
-            if (!employeeUsername || !employeePassword || !employeeName) {
-                alert('กรุณากรอกข้อมูลที่จำเป็น (ชื่อผู้ใช้, รหัสผ่าน, ชื่อ-สกุล)');
+            if (!employeeUsername) {
+                message.error('กรุณากรอกชื่อผู้ใช้');
+                return;
+            }
+            
+            if (!employeePassword) {
+                message.error('กรุณากรอกรหัสผ่าน');
+                return;
+            }
+            
+            if (!employeeName) {
+                message.error('กรุณากรอกชื่อ-สกุล');
                 return;
             }
 
@@ -148,7 +159,7 @@ function EmployeeManagement({ person }) {
             }
         } catch (error) {
             console.error('Error saving employee:', error);
-            alert('ไม่สามารถทำงานได้')
+            message.error('ไม่สามารถทำงานได้');
         }
     };
 

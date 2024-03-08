@@ -12,6 +12,8 @@ import {
 import axios from 'axios';
 import { PRODUCT_TYPE, UNIT, UPDATE_PRODUCT, get, getlotprouduct, ip } from '../Static/api';
 import Swal from 'sweetalert2';
+import { message } from 'antd';
+
 
 function EditProductDialog({ open, onClose, product, onUpdate, selectedImageProp, setSelectedImageProp, productId, productTypeId, handleGetProduct, handleCloseDialog }) {
   const [categories, setCategories] = useState([]);
@@ -112,7 +114,7 @@ function EditProductDialog({ open, onClose, product, onUpdate, selectedImageProp
       !updatedProduct.category ||
       !updatedProduct.unit
     ) {
-      alert('กรุณากรอกข้อมูลให้ครบและถูกต้อง');
+      message.error('กรุณากรอกข้อมูลให้ครบและถูกต้อง');
       return;
     }
 
@@ -355,7 +357,6 @@ function EditProductDialog({ open, onClose, product, onUpdate, selectedImageProp
                     } else {
                       // Clear the value if it's less than 1
                       handleChange({ target: { name: e.target.name, value: '' } });
-                      alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                     }
                   }} fullWidth
                 />
@@ -372,7 +373,6 @@ function EditProductDialog({ open, onClose, product, onUpdate, selectedImageProp
                     } else {
                       // Clear the value if it's less than 1
                       handleChange({ target: { name: e.target.name, value: '' } });
-                      alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                     }
                   }}
                   fullWidth

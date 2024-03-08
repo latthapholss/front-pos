@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { EditedLot, put } from '../Static/api';
 import Swal from 'sweetalert2';
+import { message } from 'antd';
 
 export default function EditLotDialog({ open, handleClose, lotData, handleEdit,handleGetLot }) {
   const [editedLot, setEditedLot] = useState(lotData);
@@ -31,6 +32,10 @@ export default function EditLotDialog({ open, handleClose, lotData, handleEdit,h
 
   const handleSave = async () => {
     try {
+      if (!editedLot.add_date || !editedLot.product_lot_qty || !editedLot.product_lot_cost || !editedLot.product_lot_price) {
+        message.error('กรุณากรอกข้อมูลให้ครบทุกช่องก่อนบันทึก');
+        return; 
+      }
       const res = await put(`/product/updatelot/${editedLot?.lot_id}`, editedLot);
       if (res.success) {
         Swal.fire({
@@ -64,16 +69,16 @@ export default function EditLotDialog({ open, handleClose, lotData, handleEdit,h
           value={editedLot?.lot_id || ''}
         />
 
-        {/* <TextField
+        <TextField
           autoFocus
           margin="dense"
           label="เลขล็อตสินค้า"
           type="text"
           fullWidth
           name="lot_number"
-          value={editedLot?.lot_number || ''}
+          value={editedLot?.lot_id || ''}
           onChange={handleChange}
-        /> */}
+        />
         <TextField
           autoFocus
           margin="dense"
