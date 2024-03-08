@@ -132,3 +132,8 @@ export const DELETELOT='/product/deletelot'
 export const EditedLot= '/product/updatelot';
 export const EditedUnit= '/struct/update_unit';
 export const EditedCategory= '/struct/update_product_type';
+
+
+//itemset
+export const getitemset='/apriori/aprioripair'
+export const gettwoproduct='/itemset/twoproduct'

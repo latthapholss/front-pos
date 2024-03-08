@@ -26,7 +26,6 @@ const CashierPage = ({ person }) => {
 
   const [userId, setUserId] = useState(null);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedPromotionId, setselectedPromotionId] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -179,7 +178,6 @@ const CashierPage = ({ person }) => {
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -217,10 +215,25 @@ const CashierPage = ({ person }) => {
   };
 
   const selectProduct = (product) => {
-    setSelectedProducts([...selectedProducts, product]);
-    console.log('Selected Product:', product);
+    // Check if the product category is 'กระจก' (glass).
+    if (product.category === 'กระจก') {
+      // Create a new product object with a unique identifier to ensure it's added as a new item.
+      // You might use a combination of the original product ID and a timestamp or a counter for uniqueness.
+      const newProduct = {
+        ...product,
+        id: `${product.id}-${new Date().getTime()}`, // Example of making the ID unique.
+        product_cost2: product.price * product.quantity
+      };
+  
+      setSelectedProducts([...selectedProducts, newProduct]);
+    } else {
+      // For products not in the 'กระจก' category, add them to the cart as usual.
+      setSelectedProducts([...selectedProducts, { ...product, product_cost2: product.price * product.quantity }]);
+    }
+  
+    console.log('Selected Productxxxx:', selectedProducts);
   };
-
+  
 
 
   const handleConfirmPayment = () => {
@@ -356,7 +369,7 @@ const CashierPage = ({ person }) => {
           onClick={openDialog}
         >
           <ShoppingCartIcon sx={{ marginRight: '5px', marginTop: '10px' }} />
-          ตระกร้าสินค้า ({selectedProducts.length} รายการ)
+          ตะกร้าสินค้า ({selectedProducts.length} รายการ)
         </Button>
       </Box>
 
@@ -473,6 +486,7 @@ const CashierPage = ({ person }) => {
                         name={product.name}
                         price={product.sellingPrice}
                         category={product.category}
+                        shouldShowDimensions={product.category === 'กระจก'}
                         image={product.image}
                         product_cost={product.costPrice}
                         product_qty={product.quantity}

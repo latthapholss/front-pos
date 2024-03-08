@@ -298,7 +298,7 @@ function Promotionadd({ person }) {
 
 
   const startAutoUpdatePromotionStatus = () => {
-    const interval = 30000; // 30 วินาทีในมิลลิวินาที
+    const interval = 600000; // 10 นาทีในมิลลิวินาที
 
     // เรียกใช้ฟังก์ชัน updatePromotionStatus เพื่ออัปเดตสถานะโปรโมชั่น
     const autoUpdatePromotionStatus = async () => {

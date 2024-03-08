@@ -28,6 +28,7 @@ import ReceiptDialog from './Component/receipt/receiptDialog';
 import ProductLotManage from './Lot/ProductLotManage';
 import receiptRefundDialog from './Component/receipt/receiptRefundDialog';
 import Promotionitemset from './Promotion/promotionitemset';
+import ItemsetPromotionadd from './Promotion/ItemsetPromotionadd';
 
 
 
@@ -101,7 +102,7 @@ function App() {
                 {person && person.user_type === 0 ? (
 
                   <>
-
+                    <Route path="/additemset/:id1/:id2" element={<ItemsetPromotionadd person={person} />} />
                     <Route path="/admin/cashier" element={<CashierPage person={person} />} />
                     <Route path="/admin/adminproduct" element={<AdminProduct person={person} />} />
                     <Route path="/admin/admincategories" element={<AdminCategories person={person} />} />
@@ -123,7 +124,7 @@ function App() {
                 {person && person.user_type === 1 ? (
 
                   <>
-
+                    <Route path="/additemset/:id1/:id2" element={<ItemsetPromotionadd person={person} />} />
                     <Route path="/admin/cashier" element={<CashierPage person={person} />} />
                     <Route path="/admin/adminproduct" element={<AdminProduct person={person} />} />
                     <Route path="/admin/admincategories" element={<AdminCategories person={person} />} />
@@ -185,6 +186,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin/Lot/ProductLotManage" element={<ProductLotManage person={person} />} />
                 <Route path="/promotion/promotionitemset" element={<Promotionitemset />} />
+                <Route path="/additemset/:id1/:id2" element={<ItemsetPromotionadd person={person} />} />
               </Routes>
             </div>
           </main>

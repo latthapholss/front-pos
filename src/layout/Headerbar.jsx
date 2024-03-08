@@ -17,9 +17,15 @@ const HeaderBar = () => {
     setAnchorEl(null);
   };
   const handleLogout = () => {
-    logout()
-    navigate("/login")
+    logout(); // ลบข้อมูลผู้ใช้จาก context หรือ state และ localStorage
+  
+    // นำทางไปยังหน้า login โดยใช้ React Router เป็นตัวอย่าง
+    navigate('/login', { replace: true });
+  
+    // โหลดหน้าเว็บใหม่, สามารถใส่ใน useEffect ของหน้า /login ถ้าไม่ต้องการให้โหลดทันที
+    window.location.reload();
   };
+  
   return (
     <Box display="flex" justifyContent="space-between" p={2} backgroundColor="white" >
       {/* search  */}
