@@ -21,6 +21,9 @@ import axios from 'axios';
 import EditLotDialog from './EditLotDialog';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { message } from 'antd';
+
+
 
 function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
@@ -101,15 +104,19 @@ export default function ProductLotManage() {
 
     const handleAddLot = async () => {
         // Validate newLot data before sending the request
+    if (!newLot.add_date) {
+        newLot.add_date = getCurrentDate();
+    }
 
         if (!newLot.add_date) {
-            alert('กรุณากรอกวันเพิ่มล็อต');
+            
+            message.error('กรุณากรอกวันเพิ่มล็อต');
         } else if (!newLot.product_lot_qty) {
-            alert('กรุณากรอกจำนวนสินค้าในล็อต');
+            message.error('กรุณากรอกจำนวนสินค้าในล็อต');
         } else if (!newLot.product_lot_cost) {
-            alert('กรุณากรอกราคาทุนสินค้าในล็อต');
+            message.error('กรุณากรอกราคาทุนสินค้าในล็อต');
         } else if (!newLot.product_lot_price) {
-            alert('กรุณากรอกราคาขายสินค้าในล็อต');
+            message.error('กรุณากรอกราคาขายสินค้าในล็อต');
         } else {
             try {
                 const requestData = {
@@ -140,17 +147,18 @@ export default function ProductLotManage() {
                     });
                     handleCloseDialog();
                     handleGetLot(); // ส่ง productId ไปด้วย
+                    getCurrentDate();
                     Swal.fire({
                         icon: 'success',
                         title: 'เพิมล็อตสินค้าสำเร็จ',
                         // text: response.data.message,
                     });
                 } else {
-                    alert(response.data.message);
+                    message.error(response.data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+                message.error('เกิดข้อผิดพลาดในการส่งข้อมูล');
             }
         }
     };
@@ -368,7 +376,6 @@ export default function ProductLotManage() {
                             } else {
                                 // Clear the value if it's less than 1
                                 setNewLot({ ...newLot, product_lot_qty: '' });
-                                alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                             }
                         }}
                     />
@@ -385,7 +392,6 @@ export default function ProductLotManage() {
                             } else {
                                 // Clear the value if it's less than 1
                                 setNewLot({ ...newLot, product_lot_cost: '' });
-                                alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                             }
                         }}
                     />
@@ -402,7 +408,6 @@ export default function ProductLotManage() {
                             } else {
                                 // Clear the value if it's less than 1
                                 setNewLot({ ...newLot, product_lot_price: '' });
-                                alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                             }
                         }}
                     />

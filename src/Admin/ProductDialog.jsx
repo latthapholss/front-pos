@@ -15,6 +15,7 @@ import { Grid } from '@mui/material';
 import { ADD_PRODUCT, PRODUCT_TYPE, UNIT, get, ip, post, getlotprouduct } from '../Static/api';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { message } from 'antd';
 
 const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
   const [categories, setCategories] = useState([]);
@@ -188,10 +189,10 @@ const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
             formData.append('product_length', newProduct.length);
             formData.append('product_width', newProduct.width);
             formData.append('product_lot_id', newProduct.lots);
-
+  
             console.log(newProduct.length)
             console.log(newProduct.width)
-
+  
             const response = await axios.post(
               `${ip}/product/add_product`,
               formData,
@@ -201,7 +202,7 @@ const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
                 },
               }
             );
-
+  
             if (response.data.success) {
               setNewProduct({
                 id: '',
@@ -220,27 +221,23 @@ const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
               setSelectedImage(null);
               onClose();
               handleGetProduct();
-
-              Swal.fire({
-                icon: 'success',
-                title: 'เพิ่มสินค้าสำเร็จ',
-                // text: response.data.message,
-              });
+  
+              message.success('เพิ่มสินค้าสำเร็จ');
             } else {
-              alert(response.data.message);
+              message.error(response.data.message);
             }
           } catch (error) {
             console.error('Error:', error);
-            alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+            message.error('เกิดข้อผิดพลาดในการส่งข้อมูล');
           }
         } else {
-          alert('กรอกข้อมูลไม่ครบถ้วน: กรุณาระบุหน่วยสินค้า');
+          message.error('กรอกข้อมูลไม่ครบถ้วน: กรุณาระบุหน่วยสินค้า');
         }
       } else {
-        alert('กรอกข้อมูลไม่ครบถ้วน: กรุณาเลือกประเภทสินค้า');
+        message.error('กรอกข้อมูลไม่ครบถ้วน: กรุณาเลือกประเภทสินค้า');
       }
     } else {
-      alert('กรอกข้อมูลไม่ครบถ้วน: กรุณาระบุชื่อสินค้า');
+      message.error('กรอกข้อมูลไม่ครบถ้วน: กรุณาระบุชื่อสินค้า');
     }
   };
 

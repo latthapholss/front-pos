@@ -29,6 +29,8 @@ import { DELETEPROMOTION, PROMOTION, PROMOTIONSTATUS, PROMOTION_ADD, UPDATE_PROM
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { useNavigate } from 'react-router';
+import { message } from 'antd';
+
 
 function Promotionadd({ person }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -204,22 +206,22 @@ function Promotionadd({ person }) {
   const handleSavePromotion = async () => {
     try {
       if (!promotionData.promotion_name) {
-        alert('กรุณากรอกชื่อโปรโมชั่น');
+        message.error("กรุณากรอกชื่อโปรโมชั่น");
         return;
       }
-
+  
       if (isNaN(promotionData.discount)) {
-        alert('กรุณากรอกค่า Discount ให้เป็นตัวเลข');
+        message.error("กรุณากรอกค่า Discount ให้เป็นตัวเลข");
         return;
       }
-
+  
       if (!promotionData.promotion_start || !promotionData.promotion_end) {
-        alert('กรุณากรอกข้อมูลเริ่มต้นและสิ้นสุดโปรโมชั่น');
+        message.error("กรุณากรอกข้อมูลเริ่มต้นและสิ้นสุดโปรโมชั่น");
         return;
       }
-
+  
       if (isNaN(promotionData.quota)) {
-        alert('กรุณากรอกค่า Quota ให้เป็นตัวเลข');
+        message.error("กรุณากรอกค่า Quota ให้เป็นตัวเลข");
         return;
       }
 
@@ -536,7 +538,6 @@ function Promotionadd({ person }) {
                     } else {
                       // Clear the value if it's less than 1
                       handleInputChange({ target: { name: e.target.name, value: '' } });
-                      alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                     }
                   }}
                   type="number"
@@ -588,7 +589,6 @@ function Promotionadd({ person }) {
                     } else {
                       // Clear the value if it's less than 1
                       handleInputChange({ target: { name: e.target.name, value: '' } });
-                      alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                     }
                   }}
                   type="number"
@@ -643,7 +643,6 @@ function Promotionadd({ person }) {
                 } else {
                   // Clear the value if it's less than 1
                   handleEditInputChange({ target: { name: e.target.name, value: '' } });
-                  alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                 }
               }}
               type="number"
@@ -700,7 +699,6 @@ function Promotionadd({ person }) {
                 } else {
                   // Clear the value if it's less than 1
                   handleEditInputChange({ target: { name: e.target.name, value: '' } });
-                  alert('ค่าต้องมากกว่าหรือเท่ากับ 1');
                 }
               }}
               type="number"

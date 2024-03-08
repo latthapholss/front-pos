@@ -29,6 +29,7 @@ import RegexHelper from '../Static/RegexHelper';
 import { Snackbar } from '@mui/material';
 import Swal from 'sweetalert2';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import { message } from 'antd';
 
 
 
@@ -115,29 +116,22 @@ function MemberManagement({ person }) {
 
   const handleSaveMember = async () => {
     if (user_username.trim() === '') {
-      setAlertMessage('กรุณากรอกชื่อผู้ใช้');
-      setIsAlertOpen(true);
+      message.error('กรุณากรอกชื่อผู้ใช้');
     } else if (!RegexHelper.validateEmail(email)) {
-      setAlertMessage('กรุณากรอกอีเมลให้ถูกต้อง');
-      setIsAlertOpen(true);
+      message.error('กรุณากรอกอีเมลให้ถูกต้อง');
     } else if (fname.length < 2) {
-      setAlertMessage('ชื่อควรมีความยาวอย่างน้อย 2 ตัวอักษร');
-      setIsAlertOpen(true);
+      message.error('ชื่อควรมีความยาวอย่างน้อย 2 ตัวอักษร');
     } else if (lname.length < 2) {
-      setAlertMessage('นามสกุลควรมีความยาวอย่างน้อย 2 ตัวอักษร');
-      setIsAlertOpen(true);
+      message.error('นามสกุลควรมีความยาวอย่างน้อย 2 ตัวอักษร');
     } else if (address.trim() === '') {
-      setAlertMessage('กรุณากรอกที่อยู่');
-      setIsAlertOpen(true);
+      message.error('กรุณากรอกที่อยู่');
+  
     } else if (!/^\d{10}$/.test(phone)) {
-      setAlertMessage('กรุณากรอกหมายเลขโทรศัพท์ให้ถูกต้อง (10 หลัก)');
-      setIsAlertOpen(true);
+      message.error('กรุณากรอกหมายเลขโทรศัพท์ให้ถูกต้อง (10 หลัก)');
     } else if (password.length < 6 || password.length > 20) {
-      setAlertMessage('รหัสผ่านควรมีความยาวอยู่ระหว่าง 6 ถึง 20 ตัวอักษร');
-      setIsAlertOpen(true);
+      message.error('รหัสผ่านควรมีความยาวอยู่ระหว่าง 6 ถึง 20 ตัวอักษร');
     } else if (password !== cpassword) {
-      setAlertMessage('รหัสผ่านไม่ตรงกัน');
-      setIsAlertOpen(true);
+      message.error('รหัสผ่านไม่ตรงกัน');
     } else {
       let req = {
         member_email: email,
@@ -184,16 +178,15 @@ function MemberManagement({ person }) {
     const isValidEmail = RegexHelper.validateEmail(selectedMemberData.email);
 
     if (!isValidEmail) {
-      Swal.fire({
-        icon: 'success',
-        title: 'email ไม่ถูกต้อง',
-        text: 'ข้อมูลถูกแก้ไขเรียบร้อย',
-        confirmButtonText: 'OK'
-      });
+      message.error('อีเมลไม่ถูกต้อง');
       console.error('Invalid email address');
       return; // Exit the function early if the email is invalid
     }
-
+    if (!selectedMemberData.fname || !selectedMemberData.lname || !selectedMemberData.address || !selectedMemberData.phone) {
+      message.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+      console.error('Required fields are missing');
+      return; 
+    }
     try {
       const response = await put(url, data);
       if (response.success) {
