@@ -23,7 +23,6 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
 import { localStorageKeys } from '../Static/LocalStorage';
-import Swal from 'sweetalert2';
 
 
 
@@ -121,20 +120,15 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                 const newQuantity = editedQuantities[product.id] || product.quantity;
                 const isGlassOrAluminum = ['กระจก', 'อลูมิเนียม'].includes(product.name);
                 let unit_price;
-
                 let productCost;
-
-
-
-
-
+                let totalAmountWithGlassCost;
 
                 if (product && product.category === 'กระจก') {
-                    productCost = totalAmountWithGlassCost;
-                    unit_price = totalAmountWithGlassCost
+                    totalAmountWithGlassCost = totalAmountWithGlassCost;
+                    totalAmountWithGlassCost = totalAmountWithGlassCost
                 } else if (product && product.category === 'อลูมิเนียม') {
-                    productCost = totalAmountWithAluminumCost;
-                    unit_price = totalAmountWithAluminumCost
+                    totalAmountWithGlassCost = totalAmountWithAluminumCost;
+                    totalAmountWithGlassCost = totalAmountWithAluminumCost
                 } else {
                     productCost = product.product_cost;
                     unit_price = product.price
@@ -147,6 +141,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                     description: product.product_detail,
                     product_cost: productCost,
                     product_lot_id: product.product_lot_id,
+                    totalAmountWithGlassCost: totalAmountWithGlassCost
                 };
             }),
             selectedMember: selectedMember.id,
@@ -185,12 +180,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                 });
 
                 onClose();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'สำเร็จ',
-                    text: 'ซื้อสินค้าเสร็จสิ้น',
-                    confirmButtonText: 'ตกลง'
-                });
+                alert('success')
                 handleGetProduct();
             } else {
                 console.error('Request failed with status:', response.status);
@@ -448,6 +438,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             const area = (length * width) / 144;
             const cost = product.price || 0;
             const newCost = area * cost * newQuantity + parseFloat(cut);
+            console.log('NeNew Costw Cost:', newCost);
 
             return parseFloat(newCost.toFixed(2));
         }
@@ -838,7 +829,9 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                             {((parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2()).toLocaleString()}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
-                                                {selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0} บาท{') '}
+                                                {selectedPromotionData ? Helper.discount(
+                                                    totalAmountWithGlassCost
+                                                    , selectedPromotionData.discount) : 0} บาท{') '}
                                             </span>
                                         </React.Fragment>
                                     ) : groupedProducts.some(product => product.category === 'กระจก') ? (
@@ -846,7 +839,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                             {`${(calculateTotalAmountWithGlassCost() - (pointuse / 10)).toLocaleString()}  ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
-                                                {selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0} บาท{') '}
+                                                {selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0} บาท{') '}
                                             </span>
                                         </React.Fragment>
                                     ) : groupedProducts.some(product => product.category === 'อลูมิเนียม') ? (
