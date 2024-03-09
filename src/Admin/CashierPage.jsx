@@ -149,42 +149,73 @@ const CashierPage = ({ person }) => {
   const handleGetProduct = async () => {
     try {
       const res = await get(PRODUCTSALES);
-      console.log("Product Sales Data:", res); // Display data received from the API in the console
+      console.log("Product Sales Data:", res);
       if (res.success) {
         const data = res.result;
+  
+        const modifiedData = data.map(item => {
+          // Assuming each item now contains an array of lot details
+          const lots = item.lots; // Directly using the array of lot objects
+  
+          // Initialize variables for selecting the lot
+          let selectedLotIndex = 0; // Index of the lot to be used for selling
+          let minLotId = lots[0]?.product_lot_id || 0; // Initialize minimum lot ID
+  
+          lots.forEach((lot, i) => {
+            if (lot.product_lot_id < minLotId) {
+              minLotId = lot.product_lot_id; // Update minimum lot ID
+              
+              selectedLotIndex = i; // Update selected lot index to the lot with the minimum ID
+            }
+          });
+          
+          let maxPrice = lots[0]?.product_lot_price || 0; // Initialize with the first lot's price
 
-        // Sort products by creation date (assuming creation date is available as a timestamp)
-        const sortedProducts = data.sort((a, b) => b.add_date - a.add_date);
+          lots.forEach((lot, i) => {
+            if (lot.product_lot_price > maxPrice) {
+              maxPrice = lot.product_lot_price; // Update to the new maximum price
+              
+              selectedLotIndex = i; // Update selected lot index to the lot with the maximum price
+            }
+          });
+        
+          let totalQuantity = 0;
 
-        // Map and format the sorted products
-        const modifiedData = sortedProducts.map(item => ({
-          id: item.product_id, // Modify product ID
-          name: item.product_name,
-          costPrice: item.product_lot_cost,
-          sellingPrice: item.product_lot_price,
-          quantity: item.total_quantity,
-          description: item.product_detail,
-          category: item.product_type,
-          unit: item.unit,
-          image: getImagePath(item.product_image),
-          is_active: item.is_active,
-          lot: item.lot_number,
-          product_lot_id: item.product_lot_id
-        }));
-
+          lots.forEach(lot => {
+              totalQuantity += lot.product_lot_qty; // Add the quantity of each lot to the total
+          });
+          
+          // Selected lot details
+          const selectedLot = lots[selectedLotIndex] || {};
+  
+          return {
+            id: item.product_id,
+            name: item.product_name,
+            selectedLotId: selectedLot.product_lot_id,
+            selectedPrice: maxPrice ,
+            selectedCost: selectedLot.product_lot_cost,
+            selectedQuantity: selectedLot.product_lot_qty,
+  
+            quantity: totalQuantity,
+            description: item.product_detail,
+            category: item.product_type,
+            unit: item.unit,
+            image: getImagePath(item.product_image),
+            is_active: item.is_active,
+            product_lot_id: selectedLot.product_lot_id,
+            costPrice: selectedLot.product_lot_cost,
+            sellingPrice: selectedLot.product_lot_price,
+          };
+        });
+  
         setProducts(modifiedData.filter(product => product.is_active === 1));
-        setFilteredAndSearchedProducts(modifiedData.filter(product => product.is_active === 1)); // Update state for displaying filtered and searched products
+        setFilteredAndSearchedProducts(modifiedData.filter(product => product.is_active === 1));
       }
     } catch (error) {
       console.error('Error fetching products:', error);
-    } finally {
     }
   };
-
-
-
-
-
+  
 
   useEffect(() => {
     saveSelectedProductsToLocalStorage(selectedProducts);
@@ -224,16 +255,16 @@ const CashierPage = ({ person }) => {
         id: `${product.id}-${new Date().getTime()}`, // Example of making the ID unique.
         product_cost2: product.price * product.quantity
       };
-  
+
       setSelectedProducts([...selectedProducts, newProduct]);
     } else {
       // For products not in the 'กระจก' category, add them to the cart as usual.
-      setSelectedProducts([...selectedProducts, { ...product, product_cost2: product.price * product.quantity }]);
+      setSelectedProducts([...selectedProducts, { ...product,  }]);
     }
-  
+
     console.log('Selected Productxxxx:', selectedProducts);
   };
-  
+
 
 
   const handleConfirmPayment = () => {
@@ -491,6 +522,11 @@ const CashierPage = ({ person }) => {
                         product_cost={product.costPrice}
                         product_qty={product.quantity}
                         lot={product.lot}
+                        selectedLotId={product.selectedLotId} // ID of the selected lot
+                        selectedPrice={product.selectedPrice} // Price of the selected lot
+                        selectedCost={product.selectedCost} // Cost of the selected lot
+                        selectedQuantity={product.selectedQuantity} // Quantity of the selected lot
+
                         product_lot_id={product.product_lot_id}
                         onSelect={(selectedProduct) =>
                           selectProduct({ ...selectedProduct, product_cost2: product.price * selectedProduct.quantity })
