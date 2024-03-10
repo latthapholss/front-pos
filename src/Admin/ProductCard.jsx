@@ -3,7 +3,7 @@ import { Card, CardMedia, CardContent, Typography, Button, Box, TextField, Snack
 import MuiAlert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
-const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_cost, product_detail, category, lot, product_lot_id, selectedLotId,selectedPrice,selectedCost,selectedQuantity}) => {
+const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_cost, product_detail, category, lot, product_lot_id, selectedLotId, selectedPrice, selectedCost, selectedQuantity, product_width, product_length, product_thickness }) => {
   const [quantity, setQuantity] = useState(1);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -11,156 +11,65 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
   const [snackbarContent, setSnackbarContent] = useState({ severity: "info", message: "" });
 
   const [adjustedProductQty, setAdjustedProductQty] = useState(product_qty); // New state to manage adjusted quantity
-  const handleGetProduct = async () => {
-    try {
-      const res = await get(PRODUCTSALES);
-      console.log("Product Sales Data:", res);
-      if (res.success) {
-        const data = res.result;
-  
-        const modifiedData = data.map(item => {
-          // Assuming each item now contains an array of lot details
-          const lots = item.lots; // Directly using the array of lot objects
-  
-          // Initialize variables for selecting the lot
-          let selectedLotIndex = 0; // Index of the lot to be used for selling
-          let minLotId = lots[0]?.product_lot_id || 0; // Initialize minimum lot ID
-
-          lots.forEach((lot, i) => {
-            if (lot.product_lot_id < minLotId) {
-              minLotId = lot.product_lot_id; // Update minimum lot ID
-          
-              selectedLotIndex = i; // Update selected lot index to the lot with the minimum ID
-            }
-          });
-          let maxPrice = lots[0]?.product_lot_price || 0; // Initialize with the first lot's price
-
-          lots.forEach((lot, i) => {
-            if (lot.product_lot_price > maxPrice) {
-              maxPrice = lot.product_lot_price; // Update to the new maximum price
-              
-              selectedLotIndex = i; // Update selected lot index to the lot with the maximum price
-            }
-          });
-        
-
-
-
-          let totalQuantity = 0;
-        
-          lots.forEach(lot => {
-              totalQuantity += lot.product_lot_qty; // Add the quantity of each lot to the total
-          });
-          
-          // Selected lot details
-          const selectedLot = lots[selectedLotIndex] || {};
-  
-          return {
-            id: item.product_id,
-            name: item.product_name,
-            selectedLotId: selectedLot.product_lot_id,
-            selectedPrice: selectedLot.product_lot_price,
-            selectedCost: selectedLot.product_lot_cost,
-            selectedQuantity: selectedLot.product_lot_qty,
-  
-            quantity: totalQuantity,
-            description: item.product_detail,
-            category: item.product_type,
-            unit: item.unit,
-            image: getImagePath(item.product_image),
-            is_active: item.is_active,
-            product_lot_id: selectedLot.product_lot_id,
-            costPrice: selectedLot.product_lot_cost,
-            sellingPrice: selectedLot.product_lot_price,
-          };
-        });
-  
-        setProducts(modifiedData.filter(product => product.is_active === 1));
-        setFilteredAndSearchedProducts(modifiedData.filter(product => product.is_active === 1));
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-  
 
   useEffect(() => {
     // Reset adjusted quantity when product_qty prop changes
     setAdjustedProductQty(product_qty);
   }, [product_qty]);
 
-const handleQuantityChange = (event) => {
+  const handleQuantityChange = (event) => {
     const value = parseInt(event.target.value, 10);
     if (value > adjustedProductQty) {
-        // Set error state and show Snackbar with error message
-        setSnackbarContent({
-            severity: 'error',
-            message: 'จำนวนที่เลือกเกินขีดจำกัดที่มีอยู่',
-        });
-        setOpenSnackbar(true);
-        // Optionally, prevent setting the quantity beyond the limit
-        // setQuantity(adjustedProductQty);
+      // Set error state and show Snackbar with error message
+      setSnackbarContent({
+        severity: 'error',
+        message: 'จำนวนที่เลือกเกินขีดจำกัดที่มีอยู่',
+      });
+      setOpenSnackbar(true);
+      // Optionally, prevent setting the quantity beyond the limit
+      // setQuantity(adjustedProductQty);
     } else {
-        setOpenSnackbar(false); // Close Snackbar if previously opened
-        setQuantity(value >= 1 ? value : 1);
+      setOpenSnackbar(false); // Close Snackbar if previously opened
+      setQuantity(value >= 1 ? value : 1);
     }
-};
+  };
 
   const handleSelect = () => {
     if (quantity > adjustedProductQty) {
-      // Example logic to handle lot change
-      const nextLot = findNextLot(quantity - adjustedProductQty, allLots); // allLots is an array of all available lots
-      if (nextLot) {
-        // Update state to reflect the new lot's details
-        setSelectedPrice(nextLot.newPrice);
-        setSelectedCost(nextLot.newCost);
-        setSelectedQuantity(nextLot.newQuantity);
-        setAdjustedProductQty(nextLot.newQuantity - (quantity - adjustedProductQty));
-  
-        // Proceed with onSelect using the new lot's details
-        onSelect({
-          id,
-          name,
-          price: nextLot.newPrice, // Updated price
-          image,
-          quantity, 
-          product_qty: nextLot.newQuantity, // Updated quantity
-          product_cost: nextLot.newCost, // Updated cost
-          product_detail,
-          category,
-          lot: nextLot.lot, // Updated lot
-          product_lot_id: nextLot.product_lot_id, // Updated product lot ID
-        });
-  
-        setOpenSnackbar(true);
-        setSnackbarContent({
-          severity: "success",
-          message: "Product updated with new lot details.",
-        });
-      } else {
-        // Handle case where no suitable next lot is found
-        setOpenSnackbar(true);
-        setSnackbarContent({
-          severity: "error",
-          message: "No more lots available to fulfill quantity.",
-        });
-      }
-    } else {
-      // If selected quantity is within current lot's capacity
-      setAdjustedProductQty(prevQty => prevQty - quantity);
-      onSelect({
-        id, name, price: selectedPrice, image, quantity,
-        product_qty: adjustedProductQty - quantity,
-        product_cost: selectedCost, product_detail, category, lot, product_lot_id,
+      // Notify the user that they cannot add more than what's available
+      setSnackbarContent({
+        severity: "error",
+        message: "ไม่สามารถเพิ่มได้ สินค้าในคลังมีน้อยกว่าที่เลือก",
       });
       setOpenSnackbar(true);
+      return; // Exit the function early to prevent further processing
+    }
+
+    if (quantity > selectedQuantity) {
+      // Notify the user that the requested quantity exceeds the current lot, but still process the addition
       setSnackbarContent({
         severity: "success",
-        message: "Product added successfully.",
+        message: "เพิ่มสินค้าสำเร็จ แต่จำนวนเกินล็อตปัจจุบัน จะดำเนินการจากล็อตถัดไป",
+      });
+    } else {
+      // Success scenario: quantity does not exceed the current lot's available quantity
+      setSnackbarContent({
+        severity: "success",
+        message: "เพิ่มสินค้าสำเร็จ.",
       });
     }
+    // If selected quantity is within current lot's capacity
+    setAdjustedProductQty(prevQty => prevQty - quantity);
+
+    onSelect({
+      id, name, price: selectedPrice, image, quantity,
+      product_qty: adjustedProductQty - quantity,
+      product_cost: selectedCost, product_detail, category, lot, product_lot_id,
+    });
+    setOpenSnackbar(true);
+
   };
-    
+
   const handlePopoverOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -221,20 +130,23 @@ const handleQuantityChange = (event) => {
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           ประเภทสินค้า: {category}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
+        {/* <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           จำนวนสินค้า: {adjustedProductQty}
-        </Typography>
+        </Typography>  */}
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
+          จำนวนสินค้า: {product_qty}
+        </Typography>
+        {/* <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
         จำนวนล็อตนี้: {selectedQuantity}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
+        </Typography> */}
+        {/* <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           ราคาล็อตนี้: {selectedPrice}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           ล็อตที่: {selectedLotId}
-        </Typography>
+        </Typography>  */}
 
-      
+
         <Button
           aria-owns={open ? 'mouse-over-popover' : undefined}
           aria-haspopup="true"
@@ -301,14 +213,28 @@ const handleQuantityChange = (event) => {
           horizontal: 'left',
         }}
       >
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">ราคา: {price} THB</Typography>
           <Typography variant="body2" color="text.secondary">ประเภทสินค้า: {category}</Typography>
-          <Typography variant="body2" color="text.secondary">จำนวนสินค้า: {product_qty}</Typography>
+          <Typography variant="body2" color="text.secondary">จำนวนสินค้าคงเหลือ: {adjustedProductQty}</Typography>
           <Typography variant="body2" color="text.secondary">รายละเอียดสินค้า: {product_detail}</Typography>
-          <Typography variant="body2" color="text.secondary">Lot: {lot}</Typography>
+          {category === "กระจก" && (
+            <>
+              <Typography variant="body2" color="text.secondary">ความสูง: {product_width} นิ้ว</Typography>
+              <Typography variant="body2" color="text.secondary">ความยาว: {product_length} นิ้ว</Typography>
+              <Typography variant="body2" color="text.secondary">ความหนา: {product_thickness} มิลลิเมตร </Typography>
+            </>
+          )}
+          {category === "อลูมิเนียม" && (
+            <>
+              <Typography variant="body2" color="text.secondary">ความยาว: {product_length} นิ้ว</Typography>
+              <Typography variant="body2" color="text.secondary">ความหนา: {product_thickness} มิลลิเมตร </Typography>
+            </>
+          )}
+
+          {/* <Typography variant="body2" color="text.secondary">Lot: {lot}</Typography>
           <Typography variant="body2" color="text.secondary">Product Lot ID: {product_lot_id}</Typography>
-          <Typography variant="body2" color="text.secondary">ต้นทุนสินค้า: {product_cost} THB</Typography>
+          <Typography variant="body2" color="text.secondary">ต้นทุนสินค้า: {product_cost} THB</Typography> */}
         </Box>
       </Popover>
     </Card>
