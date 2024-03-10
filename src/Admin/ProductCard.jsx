@@ -3,7 +3,7 @@ import { Card, CardMedia, CardContent, Typography, Button, Box, TextField, Snack
 import MuiAlert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
-const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_cost, product_detail, category, lot, product_lot_id, selectedLotId, selectedPrice, selectedCost, selectedQuantity, product_width, product_length, product_thickness }) => {
+const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_cost, product_detail, category, lot, product_lot_id, itemset_id,selectedLotId, selectedPrice, selectedCost, selectedQuantity, product_width, product_length, product_thickness }) => {
   const [quantity, setQuantity] = useState(1);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -64,7 +64,7 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
     onSelect({
       id, name, price: selectedPrice, image, quantity,
       product_qty: adjustedProductQty - quantity,
-      product_cost: selectedCost, product_detail, category, lot, product_lot_id,
+      product_cost: selectedCost, product_detail, category, lot, product_lot_id,itemset_id
     });
     setOpenSnackbar(true);
 
@@ -135,7 +135,11 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
         </Typography>  */}
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           จำนวนสินค้า: {product_qty}
-        </Typography>
+        </Typography>       
+         {/* <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
+          itemset_id: {itemset_id}
+        </Typography> */}
+
         {/* <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
         จำนวนล็อตนี้: {selectedQuantity}
         </Typography> */}

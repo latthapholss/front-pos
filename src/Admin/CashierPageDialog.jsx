@@ -26,7 +26,7 @@ import { localStorageKeys } from '../Static/LocalStorage';
 
 
 
-const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct, product_qty }) => {
+const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct, product_qty ,itemset_id}) => {
     const [promotions, setPromotions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userId, setUserId] = useState(null);
@@ -54,13 +54,13 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
         // Additional logic for glass and aluminum costs adjustments if needed
         if (groupedProducts.some(product => product.category === 'กระจก')) {
-            finalTotal += parseFloat(calculateTotalAmountWithGlassCost());
+            finalTotal += parseInt(calculateTotalAmountWithGlassCost());
         }
         if (groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
-            finalTotal += parseFloat(calculateTotalAmountWithAluminumCost());
+            finalTotal += parseInt(calculateTotalAmountWithAluminumCost());
         }
 
-        return finalTotal.toFixed(2); // Adjust as per your need
+        return finalTotal; // Adjust as per your need
     };
     const calculateDiscount = () => {
         if (selectedPromotionData) {
@@ -75,20 +75,20 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
     
         if (groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
             // For both Glass and Aluminum products
-            change = receivedAmount - ((parseFloat(calculateTotalAmountWithAluminumCost()) + parseFloat(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
+            change = receivedAmount - ((parseInt(calculateTotalAmountWithAluminumCost()) + parseInt(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
         } else if (groupedProducts.some(product => product.category === 'กระจก')) {
             // For Glass products only
-            change = receivedAmount - ((parseFloat(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
+            change = receivedAmount - ((parseInt(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
         } else if (groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
             // For Aluminum products only
-            change = receivedAmount - ((parseFloat(calculateTotalAmountWithAluminumCost()) - discount) - (pointuse / 10));
+            change = receivedAmount - ((parseInt(calculateTotalAmountWithAluminumCost()) - discount) - (pointuse / 10));
         } else {
             // No specific category
             change = receivedAmount - ((totalAmount - discount) - (pointuse / 10));
         }
     
         // Ensure the change is not negative, indicating insufficient amount received
-        return change >= 0 ? change.toFixed(2) : 'กรุณากรอกเงินที่รับให้ถูกต้อง';
+        return change >= 0 ? change : 'กรุณากรอกเงินที่รับให้ถูกต้อง';
     };
         /* const handleConfirmPayment = async () => {
          try {
@@ -137,6 +137,8 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             product_qty: product.product_qty,
             description: product.product_detail,
             product_lot_id: product.product_lot_id,
+            itemset_id: product.itemset_id, // Ensure this is included
+
         })),
         selectedMember: selectedMember,
         selectedPromotionId: selectedPromotionId,
@@ -160,10 +162,10 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             const cut = glassDimensions[product.id]?.cut || 0;
             const area = (length * width) / 144;
             const cost = product.price || 0;
-            const newCost = area * cost * newQuantity + parseFloat(cut);
+            const newCost = area * cost * newQuantity + parseInt(cut);
 
             console.log('New Glass Cost:222222', newCost);
-            return parseFloat(newCost.toFixed(2)); // Return calculated cost
+            return parseInt(newCost); // Return calculated cost
         };
 
         const calculateAluminumPrice = (product, newQuantity) => {
@@ -174,10 +176,10 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             const cut = aluminumDimensions[product.id]?.cut || 0; // Cut cost
             // Adjust the calculation as needed for aluminum pricing
             const cost = product.price || 0; // Base cost of the product
-            const newCost = ((cost / 6) * width) + parseFloat(cut) * newQuantity;
+            const newCost = ((cost / 6) * width) + parseInt(cut) * newQuantity;
 
             console.log('New Aluminum Cost:', newCost);
-            return parseFloat(newCost.toFixed(2)); // Return calculated cost for aluminum
+            return parseInt(newCost); // Return calculated cost for aluminum
         };
 
         const requestData = {
@@ -185,7 +187,14 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             totalAmountWithAluminumCost: calculateTotalAmountWithAluminumCost(),
             totalAmountText: totalAmountText(),
             totalAmount: totalAmount,
-
+            selectedProducts: groupedProducts.map(product => ({
+                product_id: product.id,
+                quantity: product.quantity,
+                unit_price: product.price,
+                itemset_id: product.itemset_id, // Ensure this is correctly included
+                // other product details as needed
+            })),
+    
             selectedProducts: groupedProducts.map(product => {
 
                 const newQuantity = editedQuantities[product.id] || product.quantity;
@@ -202,18 +211,27 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                     calculatedCost = calculateGlassPrice(product, newQuantity);
                     console.log('Data to send1:', totalAmountWithGlassCost);
                     console.log('Data to send2:', calculatedCost);
+                    itemset_id=product.itemset_id
+                    console.log('itemset_id:', itemset_id);
+
 
                 } else if (product && product.category === 'อลูมิเนียม') {
                     totalAmountWithAluminumCost = totalAmountWithAluminumCost;
                     calculatedCostalu = calculateAluminumPrice(product, newQuantity);
                     console.log('Data to send1:', totalAmountWithAluminumCost);
                     console.log('Data to send2:', calculatedCostalu);
+                    itemset_id=product.itemset_id
+
 
                 } else {
                     productCost = product.product_cost;
-                    unit_price = product.price
+                    unit_price = product.price,
+                    itemset_id=product.itemset_id
+                    console.log('itemset_id:', itemset_id);
+
                 }
                 return {
+                    itemset_id:product.itemset_id,
                     product_id: product.id,
                     quantity: newQuantity,
                     unit_price: unit_price,
@@ -460,7 +478,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
         setSelectedProducts(updatedSelectedProducts);
     };
     const pointConversionRate = 10 / 100; // 1 แต้มเท่ากับ 0.1 บาท
-    const pointValue = parseFloat(pointuse) || 0; // Assuming pointuse is the input value representing the points used.
+    const pointValue = parseInt(pointuse) || 0; // Assuming pointuse is the input value representing the points used.
     const [glassDimensions, setGlassDimensions] = useState({
         length: '',
         width: '',
@@ -486,7 +504,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
         console.log('ProductId:11111', productId);
         console.log('Dimension Type:1111', dimensionType);
         console.log('Value:111', value);
-        if (parseFloat(value) >= 1) {
+        if (parseInt(value) >= 1) {
             // Handle the change
             // Your existing logic here...
         } else {
@@ -532,10 +550,10 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
             const area = (length * width) / 144;
             const cost = product.price || 0;
-            const newCost = area * cost * newQuantity + parseFloat(cut);
+            const newCost = area * cost * newQuantity + parseInt(cut);
             console.log('NeNew Costw Cost:', newCost);
 
-            return parseFloat(newCost.toFixed(2));
+            return parseInt(newCost);
         }
     };
     const calculateAluminumPrice2 = (productId, newQuantity) => {
@@ -546,7 +564,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
         if (product && product.category === 'อลูมิเนียม') {
             const cost = (product.price + 100) / 6;
-            const dimensions = parseFloat(product.price) - product.price *
+            const dimensions = parseInt(product.price) - product.price *
                 console.log('ชือ่:35453', dimensions);
             console.log('ราคา:',);
             console.log('เมตร:',);
@@ -586,7 +604,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
         }, 0);
 
 
-        return totalAmountWithGlassCost.toFixed(2);
+        return totalAmountWithGlassCost;
     };
 
     const calculateGlassDiscount = () => {
@@ -618,11 +636,11 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             console.log('เมตร:', dimensions);
             console.log('New Quantity:', newQuantity);
 
-            const newCost = parseFloat(cost * dimensions) + parseFloat(cut);
+            const newCost = parseInt(cost * dimensions) + parseInt(cut);
 
             console.log('New Cost:', newCost);
 
-            return parseFloat(newCost.toFixed(2));
+            return parseInt(newCost);
 
         } else {
             // Handle the case when the product is not found or is not 'อลูมิเนียม'
@@ -652,7 +670,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
         }, 0);
 
 
-        return totalAmountWithAluminumCost.toFixed(2);
+        return totalAmountWithAluminumCost;
     };
     const totalAmountWithAluminumCost = calculateTotalAmountWithAluminumCost();
     const totalAmountWithGlassCost = calculateTotalAmountWithGlassCost();
@@ -669,7 +687,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const totalAmountText = () => {
         if (groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
-            return `${(parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseFloat(calculateTotalAmountWithGlassCost())}`;
+            return `${(parseInt(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseInt(calculateTotalAmountWithGlassCost())}`;
         } else if (groupedProducts.some(product => product.category === 'กระจก')) {
             return `${(calculateTotalAmountWithGlassCost() || 0) - (pointuse / 10)} บาท ${pointuse && `(ลด ${pointuse / 10} บาท)`} บาท`;
         } else if (groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
@@ -745,8 +763,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                                             value={aluminumDimensions[product.id]?.width2 || ''}
                                                             onChange={(e) => {
                                                                 const value = e.target.value;
-                                                                // Use parseFloat to convert the string to a number and check it's >= 1 or empty
-                                                                if ((parseFloat(value) >= 1 && parseFloat(value) > 0) || value === '') {
+                                                                if ((parseInt(value) >= 1 && parseInt(value) > 0) || value === '') {
                                                                     handleAluminumDimensionsChange(product.id, 'width2', value);
                                                                 } else {
                                                                     // Clear the input and alert if the value is less than 1 or negative
@@ -766,7 +783,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                                             onChange={(e) => {
                                                                 const value = e.target.value;
                                                                 // Check if the value is numeric and non-negative before allowing the change
-                                                                if ((parseFloat(value) >= 1 && parseFloat(value) > 0) || value === '') {
+                                                                if ((parseInt(value) >= 1 && parseInt(value) > 0) || value === '') {
                                                                     handleGlassDimensionsChange(product.id, 'cut', value);
                                                                 } else {
                                                                     // Optionally clear the value or keep the last valid value if it's less than 1 or negative
@@ -884,7 +901,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                     {groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม') ? (
 
 
-                                        `${((parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseFloat(calculateTotalAmountWithGlassCost())).toLocaleString()}`
+                                        `${((parseInt(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseInt(calculateTotalAmountWithGlassCost())).toLocaleString()}`
 
 
 
@@ -918,7 +935,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                 <TableCell align="right">
                                     {(groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) ? (
                                         <React.Fragment>
-                                            {(parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
+                                            {(parseInt(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseInt(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
                                                 {selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0} บาท{') '}
@@ -996,14 +1013,14 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                             variant="outlined"
                             type="number"
                             value={receivedAmount}
-                            onChange={(e) => setReceivedAmount(parseFloat(e.target.value))}
+                            onChange={(e) => setReceivedAmount(parseInt(e.target.value))}
                             onBlur={calculateChange} // Trigger change calculation when the user finishes entering the amount
                         />
                         <Box sx={{ mt: 2, textAlign: 'center', backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px' }}>
                             <Typography variant="subtitle1"> ราคารวมสุทธิ{' '}
                                 {(groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) ? (
                                     <React.Fragment>
-                                        {(parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
+                                        {(parseInt(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseInt(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
                                     </React.Fragment>
                                 ) : groupedProducts.some(product => product.category === 'กระจก') ? (
                                     <React.Fragment>

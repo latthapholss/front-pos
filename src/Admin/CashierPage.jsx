@@ -198,6 +198,7 @@ const CashierPage = ({ person }) => {
             product_width: item.product_width,
             product_length: item.product_length,
             product_thickness: item.product_thickness,
+            item_id:item.itemset_id,
 
             quantity: totalQuantity,
             description: item.product_detail,
@@ -258,6 +259,7 @@ const CashierPage = ({ person }) => {
         id: `${product.id}-${new Date().getTime()}`, // Example of making the ID unique.
         product_cost2: product.price * product.quantity
       };
+      
 
       setSelectedProducts([...selectedProducts, newProduct]);
     } else {
@@ -532,6 +534,8 @@ const CashierPage = ({ person }) => {
                         product_width= {product.product_width}
                         product_length={product.product_length}
                         product_thickness= {product.product_thickness}
+                        itemset_id={product.item_id}
+
                         product_detail ={product.description}
                         product_lot_id={product.product_lot_id}
                         onSelect={(selectedProduct) =>

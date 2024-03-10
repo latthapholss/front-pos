@@ -21,6 +21,7 @@ export default function ItemsetPromotionadd() {
   const [productQuantity2, setProductQuantity2] = useState("");
   const [setQuantity, setSetQuantity] = useState("");
   const [discountCode, setDiscountCode] = useState("");
+  const [discountCodeCost, setDiscountCodeCost] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
   const { id1, id2 } = useParams();
@@ -28,12 +29,12 @@ export default function ItemsetPromotionadd() {
   const [details, setDetails] = useState("");
   const [itemsetname, setItemsetName] = useState("");
   const navigate = useNavigate();
+  const [totalCost, setTotalCost] = useState(0);
 
   useEffect(() => {
     handlegettwoproduct();
     console.log(products1);
   }, []);
-
   const handlegettwoproduct = () => {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -57,31 +58,32 @@ export default function ItemsetPromotionadd() {
     fetch(ip + gettwoproduct, requestOptions)
       .then((response) => response.json())
       .then((result) => {
-        // console.log(result);
         if (result.success) {
           const product1 = {
-            id: result.data.product1.product_id,
-            name: result.data.product1.product_name,
-            quantity: result.data.product1.product_lot_qty,
-            is_active: result.data.product1.is_active,
-            price: result.data.product1.product_lot_price,
-            product_type_id: result.data.product1.product_type_id,
+            id: result.data.product1[0].product_id,
+            name: result.data.product1[0].product_name,
+            quantity: result.data.product1[0].total_qty,
+            price: result.data.product1[0].total_price,
+            cost: result.data.product1[0].total_cost,
           };
 
           const product2 = {
-            id: result.data.product2.product_id,
-            name: result.data.product2.product_name,
-            quantity: result.data.product2.product_lot_qty,
-            is_active: result.data.product2.is_active,
-            price: result.data.product2.product_lot_price,
-            product_type_id: result.data.product2.product_type_id,
+            id: result.data.product2[0].product_id,
+            name: result.data.product2[0].product_name,
+            quantity: result.data.product2[0].total_qty,
+            price: result.data.product2[0].total_price,
+            cost: result.data.product2[0].total_cost,
           };
 
           setProducts1(product1);
           setProducts2(product2);
           const totalPrice = product1.price + product2.price;
+          const totalCost = product1.cost + product2.cost;
           setTotalPrice(totalPrice);
-        } else
+          setTotalCost(totalCost);
+          console.log("Product 1:", product1);
+          console.log("Product 2:", product2);
+        } else {
           Swal.fire({
             icon: "error",
             title: "สินค้าหมดหรือไม่มีสินค้า",
@@ -91,6 +93,7 @@ export default function ItemsetPromotionadd() {
               window.history.back();
             }
           });
+        }
       })
       .catch((error) => console.error(error));
   };
@@ -117,6 +120,7 @@ export default function ItemsetPromotionadd() {
       itemset_qty: setQuantity,
       itemset_product_1: products1.id,
       itemset_product_2: products2.id,
+      itemset_cost: totalCost,
     });
     if (!itemsetname || !details || !setQuantity || !discountCode) {
       // ถ้ามีข้อมูลไม่ครบ ให้แสดงข้อความเตือน
@@ -169,8 +173,10 @@ export default function ItemsetPromotionadd() {
     // ตรวจสอบว่าค่าที่กรอกเข้ามาไม่เกิน 100
     if (value === "" || (parseInt(value) >= 0 && parseInt(value) <= 100)) {
       setDiscountCode(value);
+      setDiscountCodeCost(value);
     }
   };
+
   const handleDetailsChange = (event) => {
     setDetails(event.target.value);
   };
@@ -230,9 +236,7 @@ export default function ItemsetPromotionadd() {
                 เพิ่มชุดสินค้า
               </Typography>
             </Grid>
-            <Container
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
+            <Container style={{ display: "flex", justifyContent: "center" }}>
               <Box
                 sx={{
                   bgcolor: "white",
@@ -333,16 +337,38 @@ export default function ItemsetPromotionadd() {
                     ),
                   }}
                 />
-
+                <TextField
+                  sx={{ mb: 2, gridColumn: "1 / span 2" }}
+                  label="จำนวนคู่สูงสุด"
+                  value={
+                    (parseInt(products1.quantity) +
+                      parseInt(products2.quantity)) /
+                    2
+                  }
+                  fullWidth
+                  margin="normal"
+                  disabled
+                />
                 <TextField
                   sx={{ mb: 2 }}
-                  label="กรอกจำนวนชุดสินค้า"
+                  label="จำนวนชุดสินค้า (ไม่เกินจำนวนคู่สูงสุด)"
                   value={setQuantity}
-                  onChange={(e) => setSetQuantity(e.target.value)}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    const maxPairs =
+                      (parseInt(products1.quantity) +
+                        parseInt(products2.quantity)) /
+                      2;
+                    // ตรวจสอบว่าค่าที่กรอกเข้ามาไม่เกินจำนวนคู่สูงสุด
+                    if (value <= maxPairs) {
+                      setSetQuantity(value);
+                    }
+                  }}
                   fullWidth
                   margin="normal"
                   type="number"
                 />
+
                 <TextField
                   sx={{ mb: 2 }}
                   label="กรอก % ลดราคา"
@@ -384,6 +410,31 @@ export default function ItemsetPromotionadd() {
                               } บาท)`
                             : ` ${totalPrice} บาท`}
                         </Typography>
+                        :
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  sx={{ mb: 2, gridColumn: "1 / span 2" }}
+                  fullWidth
+                  margin="normal"
+                  type="number"
+                  disabled
+                  value={totalCost}
+                  InputProps={{
+                    style: { textAlign: "center" },
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Typography variant="body2"> ราคาต้นทุนรวม </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: discountCodeCost ? "red" : "inherit",
+                            marginLeft: 1,
+                            marginRight: 1,
+                          }}
+                        ></Typography>
                         :
                       </InputAdornment>
                     ),
