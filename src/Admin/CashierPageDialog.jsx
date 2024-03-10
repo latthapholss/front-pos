@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
 import { GETMEMBER, PROMOTION, PROMOTIONSTATUS, PROMOTION_ADD, confrimorder, get, ip, post, } from '../Static/api';
 import {
     Button,
@@ -26,7 +26,7 @@ import { localStorageKeys } from '../Static/LocalStorage';
 
 
 
-const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct ,product_qty}) => {
+const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct, product_qty }) => {
     const [promotions, setPromotions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userId, setUserId] = useState(null);
@@ -46,8 +46,51 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
         HandleUserDetail(); // เรียกใช้ฟังก์ชั่น HandleUserDetail เพื่อดึง userId และพิมพ์ค่าของ userId ออกมา
     }, []);
 
+    const [receivedAmount, setReceivedAmount] = useState('');
+    const calculateFinalTotal = () => {
+        let finalTotal = totalAmount;
+        const discountAmount = selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0;
+        finalTotal -= discountAmount + (pointuse / 10);
 
-    /* const handleConfirmPayment = async () => {
+        // Additional logic for glass and aluminum costs adjustments if needed
+        if (groupedProducts.some(product => product.category === 'กระจก')) {
+            finalTotal += parseFloat(calculateTotalAmountWithGlassCost());
+        }
+        if (groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
+            finalTotal += parseFloat(calculateTotalAmountWithAluminumCost());
+        }
+
+        return finalTotal.toFixed(2); // Adjust as per your need
+    };
+    const calculateDiscount = () => {
+        if (selectedPromotionData) {
+            return Helper.discount(totalAmount, selectedPromotionData.discount);
+        }
+        return 0;
+    };
+    
+    const calculateChange = () => {
+        let change = 0;
+        const discount = calculateDiscount(); // คำนวณค่าส่วนลดจากโปรโมชั่น
+    
+        if (groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
+            // For both Glass and Aluminum products
+            change = receivedAmount - ((parseFloat(calculateTotalAmountWithAluminumCost()) + parseFloat(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
+        } else if (groupedProducts.some(product => product.category === 'กระจก')) {
+            // For Glass products only
+            change = receivedAmount - ((parseFloat(calculateTotalAmountWithGlassCost()) - discount) - (pointuse / 10));
+        } else if (groupedProducts.some(product => product.category === 'อลูมิเนียม')) {
+            // For Aluminum products only
+            change = receivedAmount - ((parseFloat(calculateTotalAmountWithAluminumCost()) - discount) - (pointuse / 10));
+        } else {
+            // No specific category
+            change = receivedAmount - ((totalAmount - discount) - (pointuse / 10));
+        }
+    
+        // Ensure the change is not negative, indicating insufficient amount received
+        return change >= 0 ? change.toFixed(2) : 'กรุณากรอกเงินที่รับให้ถูกต้อง';
+    };
+        /* const handleConfirmPayment = async () => {
          try {
              const postData = {
                  // ใส่ข้อมูลที่จำเป็นสำหรับ API เพิ่มโปรโมชั่นใหม่
@@ -111,32 +154,32 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
         const calculateGlassPrice = (product, newQuantity) => {
             if (product.category !== 'กระจก') return;
-    
+
             const length = glassDimensions[product.id]?.length || 0;
             const width = glassDimensions[product.id]?.width || 0;
             const cut = glassDimensions[product.id]?.cut || 0;
             const area = (length * width) / 144;
             const cost = product.price || 0;
             const newCost = area * cost * newQuantity + parseFloat(cut);
-    
+
             console.log('New Glass Cost:222222', newCost);
             return parseFloat(newCost.toFixed(2)); // Return calculated cost
         };
-    
+
         const calculateAluminumPrice = (product, newQuantity) => {
             if (product.category !== 'อลูมิเนียม') return;
-        
+
             // Assume dimensions and cost are retrieved similarly as for glass
             const width = aluminumDimensions[product.id]?.width2 || 0; // Using width2 for aluminum
             const cut = aluminumDimensions[product.id]?.cut || 0; // Cut cost
             // Adjust the calculation as needed for aluminum pricing
             const cost = product.price || 0; // Base cost of the product
             const newCost = ((cost / 6) * width) + parseFloat(cut) * newQuantity;
-        
+
             console.log('New Aluminum Cost:', newCost);
             return parseFloat(newCost.toFixed(2)); // Return calculated cost for aluminum
         };
-            
+
         const requestData = {
             totalAmountWithGlassCost: calculateTotalAmountWithGlassCost(),
             totalAmountWithAluminumCost: calculateTotalAmountWithAluminumCost(),
@@ -144,7 +187,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             totalAmount: totalAmount,
 
             selectedProducts: groupedProducts.map(product => {
-                
+
                 const newQuantity = editedQuantities[product.id] || product.quantity;
                 const isGlassOrAluminum = ['กระจก', 'อลูมิเนียม'].includes(product.name);
                 let unit_price;
@@ -179,9 +222,9 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                     product_cost: productCost,
                     product_lot_id: product.product_lot_id,
                     totalAmountWithGlassCost: totalAmountWithGlassCost,
-                    calculatedCost:calculatedCost,
-                    calculatedCostalu:calculatedCostalu,
-                    totalAmountWithAluminumCost:totalAmountWithAluminumCost
+                    calculatedCost: calculatedCost,
+                    calculatedCostalu: calculatedCostalu,
+                    totalAmountWithAluminumCost: totalAmountWithAluminumCost
                 };
             }),
             selectedMember: selectedMember.id,
@@ -355,14 +398,14 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
     const handleEditQuantity = (productId, newQuantity) => {
         const newQty = parseInt(newQuantity, 10); // Convert the input value to a number
         const product = groupedProducts.find((product) => product.id === productId);
-        const availableQty = product ? product.product_qty+2 : 0; // Assuming `product_qty` is the available stock
-    
+        const availableQty = product ? product.product_qty + 2 : 0; // Assuming `product_qty` is the available stock
+
         if (newQty >= availableQty) {
             // If the new quantity exceeds available stock, show an error message
             alert("จำนวนที่คุณกรอกเกินกว่าสินค้าที่มีในสต็อก กรุณากรอกจำนวนน้อยลง");
             return; // Prevent the quantity from being updated
         }
-    
+
         // If the new quantity is valid, update the state
         setEditedQuantities((prevQuantities) => ({
             ...prevQuantities,
@@ -471,7 +514,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const calculateGlassPrice = (productId, newQuantity) => {
         const product = groupedProducts.find((product) => product.id === productId);
-            console.log('productIdproductId:', productId);
+        console.log('productIdproductId:', productId);
 
         if (!product) {
             return 0; // Return 0 if the product is not found
@@ -666,7 +709,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                         {/* <TableCell align="right">{`${product.product_lot_id}`}</TableCell> */}
 
                                         <TableCell align="right">
-                     
+
 
                                             <TextField
                                                 type="number"
@@ -875,17 +918,15 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                 <TableCell align="right">
                                     {(groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) ? (
                                         <React.Fragment>
-                                            {((parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10)) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2()).toLocaleString()}
+                                            {(parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
-                                                {selectedPromotionData ? Helper.discount(
-                                                    totalAmountWithGlassCost
-                                                    , selectedPromotionData.discount) : 0} บาท{') '}
+                                                {selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0} บาท{') '}
                                             </span>
                                         </React.Fragment>
                                     ) : groupedProducts.some(product => product.category === 'กระจก') ? (
                                         <React.Fragment>
-                                            {`${(calculateTotalAmountWithGlassCost() - (pointuse / 10)).toLocaleString()}  ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
+                                            {`${(calculateTotalAmountWithGlassCost() - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()} ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
                                                 {selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0} บาท{') '}
@@ -893,24 +934,23 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                         </React.Fragment>
                                     ) : groupedProducts.some(product => product.category === 'อลูมิเนียม') ? (
                                         <React.Fragment>
-                                            {`${((calculateTotalAmountWithAluminumCost() || 0) - (pointuse / 10)).toLocaleString()}  ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
+                                            {`${((calculateTotalAmountWithAluminumCost() || 0) - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0)).toLocaleString()} ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
                                                 {' (ลดจากโปรโมชั่น '}
-                                                {selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0} บาท{') '}                                        </span>
-
+                                                {selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0} บาท{') '}
+                                            </span>
                                         </React.Fragment>
                                     ) : (
                                         <React.Fragment>
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0 }}>
-                                                {`${(totalAmount - (pointuse / 10)).toLocaleString()} บาท  `}
+                                                {`${(totalAmount - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0)).toLocaleString()} บาท `}
                                             </span>
                                             <span style={{ display: 'inline-block', margin: 0, padding: 0, width: '200px', marginLeft: '-170px', color: 'red' }}>
-                                                {'(ลดจากโปรโมชั่น'} {selectedPromotionData ? `${Helper.discount(totalAmount, selectedPromotionData.discount)} บาท` : '0 บาท)'}
+                                                {'(ลดจากโปรโมชั่น'} {selectedPromotionData ? `${Helper.discount(totalAmount, selectedPromotionData.discount)} บาท)` : '0 บาท)'}
                                             </span>
-
                                         </React.Fragment>
-
                                     )}
+
 
                                 </TableCell>
 
@@ -919,54 +959,84 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                     </Table>
 
                 </TableContainer>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <div style={{ paddingRight: '0px', backgroundColor: '', marginLeft: '430px' }}>
-                        <Autocomplete
-                            sx={{ m: 1, minWidth: 120, marginRight: '10px', overflow: 'hidden', paddingTop: '10px' }}
-                            value={selectedMember || null}
-                            onChange={(event, newValue) => {
-                                setSelectedMember(newValue);
-                            }}
-                            options={members}
-                            getOptionLabel={(member) => member.name}
-                            renderInput={(params) => <TextField sx={{ backgroundColor: '', marginLeft: '-0px', paddingLeft: '-10px' }}{...params} label="เลือกสมาชิก" style={{ marginRight: '130px', }} />}
-                            renderOption={(props, option) => (
-                                <li {...props}>
-                                    {option.name}
-                                </li>
-                            )}
-                        />
-                        <FormControl sx={{ m: 1, minWidth: 120 }}>
-                            <InputLabel >โปรโมชั่น</InputLabel>
-                            <Select
-                                style={{ marginRight: '-99px' }}
-                                value={selectedPromotionId}
-                                onChange={handlePromotionChange}
-                            >
-                                <MenuItem value={null}>ไม่เลือกโปรโมชั่น</MenuItem>
-                                {promotions.map((promotionData) => (
-                                    <MenuItem key={promotionData.id} value={promotionData.id}>
-                                        {promotionData.promotionName} - {promotionData.discount} %
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', padding: '20px', flexWrap: 'wrap' }}>
+                    {/* Autocomplete for selecting a member */}
+                    <Autocomplete
+                        sx={{ m: 1, minWidth: 120, maxWidth: 300 }}
+                        value={selectedMember || null}
+                        onChange={(event, newValue) => setSelectedMember(newValue)}
+                        options={members}
+                        getOptionLabel={(member) => member.name}
+                        renderInput={(params) => <TextField {...params} label="เลือกสมาชิก" />}
+                    />
 
-                        {
-                            selectedMember && (
-                                <FormControl sx={{ m: 1, minWidth: 120, paddingTop: '60px', backgroundColor: '' }}>
-                                    <Typography sx={{ color: '#339900', paddingBottom: '0px', marginLeft: '-130px' }}>คะแนนของสมาชิก = {selectedMember.point}</Typography>
-                                    <TextField
-                                        sx={{ color: '#339900', marginLeft: '-136px' }}
-                                        value={pointuse}
-                                        onChange={handlePointInputChange}
-                                        label="คะแนน"
-                                    />
-                                </FormControl>
-                            )
-                        }
-                    </div>
-                </div>
+                    {/* Promotion select */}
+                    <FormControl sx={{ m: 1, minWidth: 120, maxWidth: 300 }}>
+                        <InputLabel>โปรโมชั่น</InputLabel>
+                        <Select
+                            value={selectedPromotionId}
+                            onChange={handlePromotionChange}
+                        >
+                            <MenuItem value={null}>ไม่เลือกโปรโมชั่น</MenuItem>
+                            {promotions.map((promotionData) => (
+                                <MenuItem key={promotionData.id} value={promotionData.id}>
+                                    {promotionData.promotionName} - {promotionData.discount}%
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    {/* Points display and input if a member is selected */}
+
+
+                    {/* Received amount and change display */}
+                    <Box sx={{ m: 1, minWidth: 120, maxWidth: 300, display: 'flex', flexDirection: 'column' }}>
+                        <TextField
+                            label="Received Amount"
+                            variant="outlined"
+                            type="number"
+                            value={receivedAmount}
+                            onChange={(e) => setReceivedAmount(parseFloat(e.target.value))}
+                            onBlur={calculateChange} // Trigger change calculation when the user finishes entering the amount
+                        />
+                        <Box sx={{ mt: 2, textAlign: 'center', backgroundColor: '#e3f2fd', padding: '10px', borderRadius: '4px' }}>
+                            <Typography variant="subtitle1"> ราคารวมสุทธิ{' '}
+                                {(groupedProducts.some(product => product.category === 'กระจก') && groupedProducts.some(product => product.category === 'อลูมิเนียม')) ? (
+                                    <React.Fragment>
+                                        {(parseFloat(calculateTotalAmountWithAluminumCost()) - (pointuse / 10) + parseFloat(calculateTotalAmountWithGlassCost()) - calculateAluminumPrice2() - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()}
+                                    </React.Fragment>
+                                ) : groupedProducts.some(product => product.category === 'กระจก') ? (
+                                    <React.Fragment>
+                                        {`${(calculateTotalAmountWithGlassCost() - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmountWithGlassCost, selectedPromotionData.discount) : 0)).toLocaleString()} ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
+                                    </React.Fragment>
+                                ) : groupedProducts.some(product => product.category === 'อลูมิเนียม') ? (
+                                    <React.Fragment>
+                                        {`${((calculateTotalAmountWithAluminumCost() || 0) - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0)).toLocaleString()} ${pointuse && `(ลด ${pointuse / 10} บาท)`} `}
+                                    </React.Fragment>
+                                ) : (
+                                    <React.Fragment>
+                                        <span style={{ display: 'inline-block', margin: 0, padding: 0 }}>
+                                            {`${(totalAmount - (pointuse / 10) - (selectedPromotionData ? Helper.discount(totalAmount, selectedPromotionData.discount) : 0)).toLocaleString()} บาท `}
+                                        </span>
+                                    </React.Fragment>
+                                )}
+
+                                <br></br> <span>เงินทอน: {calculateChange()} </span>
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Box>
+                {selectedMember && (
+                    <Box sx={{ m: 1, minWidth: 120, maxWidth: 200, display: 'flex', flexDirection: 'column', marginTop: -10, paddingLeft: 2.5 }}>
+                        <Typography sx={{ mb: 2, }}>คะแนนของสมาชิก = {selectedMember.point}</Typography>
+                        <TextField
+                            value={pointuse}
+                            onChange={handlePointInputChange}
+                            label="คะแนน"
+                            type="number"
+                        />
+                    </Box>
+                )}
             </DialogContent >
 
 
