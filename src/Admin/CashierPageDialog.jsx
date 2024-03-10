@@ -26,7 +26,7 @@ import { localStorageKeys } from '../Static/LocalStorage';
 
 
 
-const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct }) => {
+const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, removeProduct, removeProducts, handleGetProduct ,product_qty}) => {
     const [promotions, setPromotions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userId, setUserId] = useState(null);
@@ -109,7 +109,34 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const handleConfirmPayment = async (productIds, productId) => {
 
-
+        const calculateGlassPrice = (product, newQuantity) => {
+            if (product.category !== 'กระจก') return;
+    
+            const length = glassDimensions[product.id]?.length || 0;
+            const width = glassDimensions[product.id]?.width || 0;
+            const cut = glassDimensions[product.id]?.cut || 0;
+            const area = (length * width) / 144;
+            const cost = product.price || 0;
+            const newCost = area * cost * newQuantity + parseFloat(cut);
+    
+            console.log('New Glass Cost:222222', newCost);
+            return parseFloat(newCost.toFixed(2)); // Return calculated cost
+        };
+    
+        const calculateAluminumPrice = (product, newQuantity) => {
+            if (product.category !== 'อลูมิเนียม') return;
+        
+            // Assume dimensions and cost are retrieved similarly as for glass
+            const width = aluminumDimensions[product.id]?.width2 || 0; // Using width2 for aluminum
+            const cut = aluminumDimensions[product.id]?.cut || 0; // Cut cost
+            // Adjust the calculation as needed for aluminum pricing
+            const cost = product.price || 0; // Base cost of the product
+            const newCost = ((cost / 6) * width) + parseFloat(cut) * newQuantity;
+        
+            console.log('New Aluminum Cost:', newCost);
+            return parseFloat(newCost.toFixed(2)); // Return calculated cost for aluminum
+        };
+            
         const requestData = {
             totalAmountWithGlassCost: calculateTotalAmountWithGlassCost(),
             totalAmountWithAluminumCost: calculateTotalAmountWithAluminumCost(),
@@ -117,18 +144,28 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             totalAmount: totalAmount,
 
             selectedProducts: groupedProducts.map(product => {
+                
                 const newQuantity = editedQuantities[product.id] || product.quantity;
                 const isGlassOrAluminum = ['กระจก', 'อลูมิเนียม'].includes(product.name);
                 let unit_price;
                 let productCost;
                 let totalAmountWithGlassCost;
+                let calculatedCost;
+                let calculatedCostalu;
+                let totalAmountWithAluminumCost;
 
                 if (product && product.category === 'กระจก') {
                     totalAmountWithGlassCost = totalAmountWithGlassCost;
-                    totalAmountWithGlassCost = totalAmountWithGlassCost
+                    calculatedCost = calculateGlassPrice(product, newQuantity);
+                    console.log('Data to send1:', totalAmountWithGlassCost);
+                    console.log('Data to send2:', calculatedCost);
+
                 } else if (product && product.category === 'อลูมิเนียม') {
-                    totalAmountWithGlassCost = totalAmountWithAluminumCost;
-                    totalAmountWithGlassCost = totalAmountWithAluminumCost
+                    totalAmountWithAluminumCost = totalAmountWithAluminumCost;
+                    calculatedCostalu = calculateAluminumPrice(product, newQuantity);
+                    console.log('Data to send1:', totalAmountWithAluminumCost);
+                    console.log('Data to send2:', calculatedCostalu);
+
                 } else {
                     productCost = product.product_cost;
                     unit_price = product.price
@@ -141,7 +178,10 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                     description: product.product_detail,
                     product_cost: productCost,
                     product_lot_id: product.product_lot_id,
-                    totalAmountWithGlassCost: totalAmountWithGlassCost
+                    totalAmountWithGlassCost: totalAmountWithGlassCost,
+                    calculatedCost:calculatedCost,
+                    calculatedCostalu:calculatedCostalu,
+                    totalAmountWithAluminumCost:totalAmountWithAluminumCost
                 };
             }),
             selectedMember: selectedMember.id,
@@ -313,9 +353,20 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const [editedQuantities, setEditedQuantities] = useState({});
     const handleEditQuantity = (productId, newQuantity) => {
+        const newQty = parseInt(newQuantity, 10); // Convert the input value to a number
+        const product = groupedProducts.find((product) => product.id === productId);
+        const availableQty = product ? product.product_qty+2 : 0; // Assuming `product_qty` is the available stock
+    
+        if (newQty >= availableQty) {
+            // If the new quantity exceeds available stock, show an error message
+            alert("จำนวนที่คุณกรอกเกินกว่าสินค้าที่มีในสต็อก กรุณากรอกจำนวนน้อยลง");
+            return; // Prevent the quantity from being updated
+        }
+    
+        // If the new quantity is valid, update the state
         setEditedQuantities((prevQuantities) => ({
             ...prevQuantities,
-            [productId]: newQuantity,
+            [productId]: newQty,
         }));
     };
     const tableHeaderStyle = {
@@ -420,6 +471,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const calculateGlassPrice = (productId, newQuantity) => {
         const product = groupedProducts.find((product) => product.id === productId);
+            console.log('productIdproductId:', productId);
 
         if (!product) {
             return 0; // Return 0 if the product is not found
@@ -441,6 +493,34 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
             console.log('NeNew Costw Cost:', newCost);
 
             return parseFloat(newCost.toFixed(2));
+        }
+    };
+    const calculateAluminumPrice2 = (productId, newQuantity) => {
+        const product = groupedProducts.find((product) => product.id === productId);
+        let cost2 = 0; // Define cost2 at a higher scope
+
+
+
+        if (product && product.category === 'อลูมิเนียม') {
+            const cost = (product.price + 100) / 6;
+            const dimensions = parseFloat(product.price) - product.price *
+                console.log('ชือ่:35453', dimensions);
+            console.log('ราคา:',);
+            console.log('เมตร:',);
+            console.log('New Quantity:', newQuantity);
+
+            const newCost = product.price - 1000;
+
+            console.log('New Cost:', newCost);
+
+            const calculatedPrice = -product.price;
+            console.log('Calculated Price:', calculatedPrice);
+
+            return (-product.price);
+
+        } else {
+            // Handle the case when the product is not found or is not 'อลูมิเนียม'
+            return (''); // or some default value
         }
     };
 
@@ -483,7 +563,6 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
     const calculateAluminumPrice = (productId, newQuantity) => {
         const product = groupedProducts.find((product) => product.id === productId);
-        let cost2 = 0; // Define cost2 at a higher scope
 
 
 
@@ -500,39 +579,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
 
             console.log('New Cost:', newCost);
 
-            const calculatedPrice = newCost.toFixed(2);
-            console.log('Calculated Price:', calculatedPrice);
-
-            return calculatedPrice;
-            return
-
-        } else {
-            // Handle the case when the product is not found or is not 'อลูมิเนียม'
-            return (''); // or some default value
-        }
-    };
-    const calculateAluminumPrice2 = (productId, newQuantity) => {
-        const product = groupedProducts.find((product) => product.id === productId);
-        let cost2 = 0; // Define cost2 at a higher scope
-
-
-
-        if (product && product.category === 'อลูมิเนียม') {
-            const cost = (product.price + 100) / 6;
-            const dimensions = parseFloat(product.price) - product.price *
-                console.log('ชือ่:35453', dimensions);
-            console.log('ราคา:',);
-            console.log('เมตร:',);
-            console.log('New Quantity:', newQuantity);
-
-            const newCost = product.price - 1000;
-
-            console.log('New Cost:', newCost);
-
-            const calculatedPrice = -product.price;
-            console.log('Calculated Price:', calculatedPrice);
-
-            return (-product.price);
+            return parseFloat(newCost.toFixed(2));
 
         } else {
             // Handle the case when the product is not found or is not 'อลูมิเนียม'
@@ -619,6 +666,8 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                                         {/* <TableCell align="right">{`${product.product_lot_id}`}</TableCell> */}
 
                                         <TableCell align="right">
+                     
+
                                             <TextField
                                                 type="number"
                                                 value={editedQuantities[product.id] || product.quantity}
@@ -925,7 +974,7 @@ const CashierPageDialog = ({ open, onClose, selectedProducts, totalAmount, remov
                 <Button onClick={onClose} variant="contained" color="warning" sx={{ borderRadius: '1%', width: '120px' }}>
                     ย้อนกลับ
                 </Button>
-                <Button onClick={() => handleConfirmPayment(productIds)} variant="contained" color="success" sx={{ borderRadius: '1%', width: '120px' }}>
+                <Button onClick={() => handleConfirmPayment()} variant="contained" color="success" sx={{ borderRadius: '1%', width: '120px' }}>
                     ยืนยัน
                 </Button>
 

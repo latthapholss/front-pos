@@ -46,7 +46,7 @@ export default function PromotionItemSet() {
             .then(result => {
                 console.log(result); // แสดงค่า result ใน console เพื่อตรวจสอบ
                 // แปลง confidence เป็นตัวเลข (อย่าลืมตัดเครื่องหมาย % ด้วย)
-                const filteredResult = result.filter(item => parseFloat(item.confidence) > 70 && parseFloat(item.lift) >= 1.00);
+                const filteredResult = result.filter(item => parseFloat(item.confidence) >= 70 && parseFloat(item.lift) >= 1.00);
                 setItemset(filteredResult);
             })
             .catch(error => console.error(error));
