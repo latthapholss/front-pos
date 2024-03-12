@@ -140,3 +140,8 @@ export const gettwoproduct='/itemset/twoproduct'
 export const additemset='/itemset/additemset'
 export const getProductItemSet='/itemset'
 export const geteditProductItemSet='/itemset/edititemset'
+
+
+//pending
+export const CRefund='/product/CRefund'
+export const removeproduct='/product/removeproduct'

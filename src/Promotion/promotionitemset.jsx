@@ -118,11 +118,13 @@ export default function PromotionItemSet() {
                                 <TableHead style={{ backgroundColor: "#009ae1", color: 'white' }}>
                                     <TableRow>
                                         <TableCell style={{ color: 'white' }}>ชุดสินค้า</TableCell>
-                                        <TableCell style={{ color: 'white' }}>รหัสสินค้า</TableCell>
+                                        {/* <TableCell style={{ color: 'white' }}>รหัสสินค้า</TableCell>
                                         <TableCell style={{ color: 'white' }}>ชื่อสินค้า</TableCell>
                                         <TableCell style={{ color: 'white' }}>รหัสสินค้า</TableCell>
-                                        <TableCell style={{ color: 'white' }}>ชื่อสินค้า</TableCell>
+                                        <TableCell style={{ color: 'white' }}>ชื่อสินค้า</TableCell> */}
                                         <TableCell style={{ color: 'white' }}>สร้างสินค้า</TableCell> {/* เพิ่มคอลัมน์สร้างสินค้า */}
+                                    <TableCell style={{ color: 'white' }}>confident</TableCell> */}
+
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -130,10 +132,12 @@ export default function PromotionItemSet() {
                                         itemset.slice(indexOfFirstItem, indexOfLastItem).map((item, index) => (
                                             <TableRow key={index}>
                                                 <TableCell>{item.rule}</TableCell>
-                                                <TableCell>{`PID${String(item.product_id_1).padStart(6, '0')}`}</TableCell>
+                                                {/* <TableCell>{`PID${String(item.product_id_1).padStart(6, '0')}`}</TableCell>
                                                 <TableCell>{item.product_name1}</TableCell>
                                                 <TableCell>{`PID${String(item.product_id_2).padStart(6, '0')}`}</TableCell>
-                                                <TableCell>{item.product_name2}</TableCell>
+                                                <TableCell>{item.product_name2}</TableCell> */}
+                                               
+
                                                 <TableCell>
                                                     {/* เพิ่มปุ่มสร้างสินค้า */}
 
@@ -144,7 +148,9 @@ export default function PromotionItemSet() {
                                                     >
                                                         สร้าง
                                                     </Button>
+                                            
                                                 </TableCell>
+                                                <TableCell>{item.confidence}</TableCell> 
                                             </TableRow>
                                         ))
                                     ) : (

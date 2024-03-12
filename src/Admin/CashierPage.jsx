@@ -196,7 +196,9 @@ const CashierPage = ({ person }) => {
             product_length: item.product_length,
             product_thickness: item.product_thickness,
             item_id:item.itemset_id,
-
+            product_width:item.product_width,
+            product_length:item.product_length,
+            product_thickness:item.product_thickness,
             quantity: totalQuantity,
             description: item.product_detail,
             category: item.product_type,
@@ -248,7 +250,7 @@ const CashierPage = ({ person }) => {
 
   const selectProduct = (product) => {
     // Check if the product category is 'กระจก' (glass).
-    if (product.category === 'กระจก'||product.category === 'อะลูมิเนียม') {
+    if (product.category === 'กระจก'||product.category === 'อะลูมิเนียม'||product.category === 'กระจกแยกชิ้น') {
       // Create a new product object with a unique identifier to ensure it's added as a new item.
       // You might use a combination of the original product ID and a timestamp or a counter for uniqueness.
       const newProduct = {
@@ -264,7 +266,7 @@ const CashierPage = ({ person }) => {
       setSelectedProducts([...selectedProducts, { ...product,  }]);
     }
 
-    console.log('Selected Productxxxx:', selectedProducts);
+    console.log('Selected Product:', selectedProducts);
   };
 
 
@@ -282,7 +284,7 @@ const CashierPage = ({ person }) => {
   const groupedProducts = [];
   selectedProducts.forEach((product) => {
     // สมมติว่าแต่ละสินค้ามี 'id' ที่ไม่ซ้ำกัน แม้ว่าจะเป็นสินค้าประเภทเดียวกันก็ตาม
-    const isGlassProduct = product.type === 'กระจก'; // ตรวจสอบว่าเป็นสินค้ากระจกหรือไม่
+    const isGlassProduct = product.type === 'กระจก'||product.type === 'กระจกแยกชิ้น'; // ตรวจสอบว่าเป็นสินค้ากระจกหรือไม่
     if (isGlassProduct) {
       // ถ้าเป็นสินค้ากระจก ให้เพิ่มเป็นสินค้าแยกโดยไม่ต้องตรวจสอบชื่อ
       groupedProducts.push({ ...product, quantity: 7 }); // กำหนด quantity เป็น 1 สำหรับแต่ละชิ้น
@@ -519,7 +521,7 @@ const CashierPage = ({ person }) => {
                         name={product.name}
                         price={product.sellingPrice}
                         category={product.category}
-                        shouldShowDimensions={product.category === 'กระจก'}
+                        shouldShowDimensions={product.category === 'กระจก'||product.category === 'กระจกแยกชิ้น'}
                         image={product.image}
                         product_cost={product.costPrice}
                         product_qty={product.quantity}
@@ -532,6 +534,7 @@ const CashierPage = ({ person }) => {
                         product_length={product.product_length}
                         product_thickness= {product.product_thickness}
                         itemset_id={product.item_id}
+
 
                         product_detail ={product.description}
                         product_lot_id={product.product_lot_id}

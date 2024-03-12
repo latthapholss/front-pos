@@ -16,12 +16,14 @@ import {
   Alert,
 } from "@mui/material";
 import {
+  CRefund,
   GETORDERDETAIL,
   PROMOTIONSTATUS,
   get,
   getorderproduct,
   ip,
   refundproduct,
+  removeproduct,
 } from "../Static/api";
 import Swal from "sweetalert2";
 import { MenuItem, Select } from "@mui/material";
@@ -31,6 +33,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import ReceiptRefundDialog from "../Component/receipt/receiptRefundDialog";
+import TextField from '@mui/material/TextField';
 
 function SalesDetailPage({ person }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,8 +43,7 @@ function SalesDetailPage({ person }) {
   const [loading, setLoading] = useState(true);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [viewReceiptOrderId, setViewReceiptOrderId] = useState(null);
-  const [viewOrderProductsDialogOpen, setViewOrderProductsDialogOpen] =
-    useState(false);
+  const [viewOrderProductsDialogOpen, setViewOrderProductsDialogOpen] = useState(false);
   const [selectedOrderProductData, setSelectedOrderProductData] = useState({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -50,6 +52,9 @@ function SalesDetailPage({ person }) {
     useState(null);
 
   const [ORDERS, setORDERS] = useState([]);
+  const [viewRefundProductsDialogOpen, setViewRefundProductsDialogOpen] = useState(false);
+  const [selectedRefund, setSelectedRefund] = useState({});
+
 
   useEffect(() => {
     handleGetORDER();
@@ -65,7 +70,7 @@ function SalesDetailPage({ person }) {
     try {
       // แสดงค่า opid และ order_id ที่จะส่งไปใน API ใน console.log
       console.log("Sending data to API:", { opid, order_id });
-  
+
       const result = await fetch(`${ip}${refundproduct}`, {
         // ใช้ `${ip}${refundproduct}` เพื่อรวม URL
         method: "POST",
@@ -74,24 +79,24 @@ function SalesDetailPage({ person }) {
         },
         body: JSON.stringify({ opid }), // ส่ง opid และ order_id ไปยัง API
       });
-  
+
       if (!result.ok) {
         const errorText = await result.text(); // Get the error text if the response is not OK
         throw new Error(errorText || "Unexpected error");
       }
-  
+
       const data = await result.json();
-  
+
       if (data.success) {
         setSnackbarSeverity("success");
         setSnackbarMessage("คืนสินค้าเรียบร้อย");
         setSnackbarOpen(true);
-        
+
         handleViewOrderProducts(order_id); // Call handleViewOrderProducts to load order products again
-        
+
         handleGetORDER(order_id); // Assuming handleGetORDER reloads the order list
       } else {
-  
+
         setSnackbarSeverity("error");
         setSnackbarMessage(data.message || "Unexpected error");
         setSnackbarOpen(true);
@@ -102,9 +107,89 @@ function SalesDetailPage({ person }) {
       setSnackbarOpen(true);
     }
   };
-  
-  
 
+  const handleConfirmRefundProduct = async (opid, order_id) => {
+    try {
+      // แสดงค่า opid และ order_id ที่จะส่งไปใน API ใน console.log
+      console.log("Sending data to API:", { opid, order_id });
+
+      const result = await fetch(`${ip}${CRefund}`, {
+        // ใช้ `${ip}${refundproduct}` เพื่อรวม URL
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ opid }), // ส่ง opid และ order_id ไปยัง API
+      });
+
+      if (!result.ok) {
+        const errorText = await result.text(); // Get the error text if the response is not OK
+        throw new Error(errorText || "Unexpected error");
+      }
+
+      const data = await result.json();
+
+      if (data.success) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("คืนสินค้าเรียบร้อย");
+        setSnackbarOpen(true);
+
+        handleviewRefundProducts(order_id); // Call handleViewOrderProducts to load order products again
+        setViewRefundProductsDialogOpen(false)
+        handleGetORDER(order_id);
+      } else {
+
+        setSnackbarSeverity("error");
+        setSnackbarMessage(data.message || "Unexpected error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(error.message || "Unexpected error");
+      setSnackbarOpen(true);
+    }
+  };
+  const handleRemoveproduct = async (opid, order_id) => {
+    try {
+      // แสดงค่า opid และ order_id ที่จะส่งไปใน API ใน console.log
+      console.log("Sending data to API:", { opid, order_id });
+
+      const result = await fetch(`${ip}${removeproduct}`, {
+        // ใช้ `${ip}${refundproduct}` เพื่อรวม URL
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ opid }), // ส่ง opid และ order_id ไปยัง API
+      });
+
+      if (!result.ok) {
+        const errorText = await result.text(); // Get the error text if the response is not OK
+        throw new Error(errorText || "Unexpected error");
+      }
+
+      const data = await result.json();
+
+      if (data.success) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("นำสินค้าออกจากคลังเรียบร้อย");
+        setSnackbarOpen(true);
+
+        handleviewRefundProducts(order_id);
+        setViewRefundProductsDialogOpen(false)
+        handleGetORDER(order_id);
+      } else {
+
+        setSnackbarSeverity("error");
+        setSnackbarMessage(data.message || "Unexpected error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      setSnackbarSeverity("error");
+      setSnackbarMessage(error.message || "Unexpected error");
+      setSnackbarOpen(true);
+    }
+  };
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
   };
@@ -116,6 +201,9 @@ function SalesDetailPage({ person }) {
 
   const generateOrderCode = (orderId, paddingWidth) => {
     return `OID${padNumberWithZeros(orderId, paddingWidth)}`;
+  };
+  const handleviewRefundProducts = (orderId) => {
+    setViewRefundProductsDialogOpen(true);
   };
 
   const handleGetORDER = async () => {
@@ -198,6 +286,7 @@ function SalesDetailPage({ person }) {
     setViewReceiptRefundOrderId(orderId);
   };
 
+
   const currentItems = ORDERS.slice(indexOfFirstItem, indexOfLastItem);
 
   const [orderByField, setOrderByField] = useState(
@@ -249,8 +338,8 @@ function SalesDetailPage({ person }) {
           return item.op_status === "คืนสินค้า"
             ? 0
             : item.op_status === "ขายสินค้าสำเร็จ"
-            ? 0
-            : 0;
+              ? 0
+              : 0;
         } else {
           return item[orderByField];
         }
@@ -279,6 +368,29 @@ function SalesDetailPage({ person }) {
       console.error("Error fetching order products:", error);
     }
   };
+
+
+  const handleViewOrderRefundProducts = async (orderId) => {
+    try {
+      const response = await fetch(`${ip}${getorderproduct}${orderId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch order products");
+      }
+      const data = await response.json();
+
+      const successProducts = data.result.filter(product => product.status === "refund");
+
+      console.log('ข้อมูล', successProducts)
+      setSelectedRefund(successProducts);
+
+      setViewRefundProductsDialogOpen(true);
+
+      console.log(`View Order Products clicked for order ID: ${orderId}`);
+    } catch (error) {
+      console.error("Error fetching order products:", error);
+    }
+  };
+
 
   return (
     <div>
@@ -387,6 +499,8 @@ function SalesDetailPage({ person }) {
                     <TableCell style={{ color: "white" }}>
                       ใบเสร็จคืนสินค้า
                     </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      ยืนยันการคืนสินค้า                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -418,20 +532,32 @@ function SalesDetailPage({ person }) {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {item.order_products.some(
-                          (product) => product.op_status === "refund"
-                        ) && ( // เช็คว่ามีสินค้าในรายการที่มี op_status เป็น 'refund' หรือไม่
+                        {item.order_products.some((product) => product.op_status === "refund") && (
                           <Button
-                            onClick={() =>
-                              handleViewReceiptRefund(item.order_id)
-                            }
+                            onClick={() => handleViewReceiptRefund(item.order_id)}
                             variant="contained"
                             style={{
-                              backgroundColor: "#c8a078",
+                              backgroundColor: "#795548",
                               color: "white",
+                              marginRight: "8px", // Add some spacing between buttons
                             }}
                           >
                             ใบเสร็จคืนสินค้า
+                          </Button>
+
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.order_products.some((product) => product.op_status === "refund") && (
+                          <Button
+                            onClick={() => handleViewOrderRefundProducts(item.order_id)}
+                            variant="contained"
+                            style={{
+                              backgroundColor: "#9292D1",
+                              color: "white",
+                            }}
+                          >
+                            รายการคืนสินค้า
                           </Button>
                         )}
                       </TableCell>
@@ -492,7 +618,7 @@ function SalesDetailPage({ person }) {
         <DialogTitle>รายการสินค้า</DialogTitle>
         <DialogContent>
           {Array.isArray(selectedOrderProductData) &&
-          selectedOrderProductData.length > 0 ? (
+            selectedOrderProductData.length > 0 ? (
             <Table>
               <TableHead style={{ backgroundColor: "#009ae1" }}>
                 <TableRow>
@@ -517,23 +643,30 @@ function SalesDetailPage({ person }) {
                     <TableCell>{product.product_name}</TableCell>
                     <TableCell>{product.quantity}</TableCell>
                     <TableCell>{product.unit_price}</TableCell>
-
                     <TableCell
                       style={{
                         color:
                           product.status === "success"
                             ? "#44C8A7"
                             : product.status === "refund"
-                            ? "#ffbb00"
-                            : "white",
+                              ? "#ffbb00"
+                              : product.status === "Confirmrefund"
+                                ? "#1a237e"
+                                : product.status === "RemoveProduct"
+                                  ? "#d01716"
+                                  : "white",
                         border: "1px solid #e0e0e0",
                         padding: "8px",
                         backgroundColor:
                           product.status === "success"
                             ? "#E8F8F4"
                             : product.status === "refund"
-                            ? "#fff3d1"
-                            : "white",
+                              ? "#fff3d1"
+                              : product.status === "Confirmrefund"
+                                ? "#e8eaf6"
+                                : product.status === "RemoveProduct"
+                                  ? "#f8d7da"
+                                  : "white",
                         borderRadius: "5px",
                         textAlign: "center",
                         fontWeight: "bold",
@@ -542,9 +675,14 @@ function SalesDetailPage({ person }) {
                       {product.status === "success"
                         ? "ขายสินค้าสำเร็จ"
                         : product.status === "refund"
-                        ? "คืนสินค้า"
-                        : product.status}
+                          ? "คืนสินค้า"
+                          : product.status === "Confirmrefund"
+                            ? "เติมสินค้าเข้าคลัง"
+                            : product.status === "RemoveProduct"
+                              ? "สินค้ามีชำรุด:นำสินค้าออก"
+                              : product.status}
                     </TableCell>
+
                     <TableCell>
                       {product.status === "success" && (
                         <Button
@@ -567,6 +705,98 @@ function SalesDetailPage({ person }) {
           )}
         </DialogContent>
       </Dialog>
+
+
+      <Dialog
+        open={viewRefundProductsDialogOpen}
+        onClose={() => setViewRefundProductsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>ยืนยันการคืนสินค้า</DialogTitle>
+        <DialogContent>
+          {Array.isArray(selectedRefund) && selectedRefund.length > 0 ? (
+            <Table>
+              <TableHead style={{ backgroundColor: "#009ae1" }}>
+                <TableRow sx={{ whiteSpace: 'nowrap' }}>
+                  {/* <TableCell style={{ color: "white" ,whiteSpace: 'nowrap'}}>รหัสออเดอร์</TableCell>{" "} */}
+                  {/* เพิ่มคอลัมน์รหัสออเดอร์ */}
+                  <TableCell style={{ color: "white", width: '200px', whiteSpace: 'nowrap' }}>ชื่อสินค้า</TableCell>
+                  <TableCell style={{ color: "white" }}>จำนวนสินค้า</TableCell>
+                  <TableCell style={{ color: "white" }}>ราคา</TableCell>
+                  <TableCell style={{ color: "white" }}>
+                    สถานะออเดอร์{" "}
+                    {orderByField === "op_status" && (
+                      <span>{order === "asc" ? "▲" : "▼"}</span>
+                    )}
+                  </TableCell>
+                  <TableCell style={{ color: "white" }}>คืนสินค้า</TableCell>
+                  <TableCell style={{ color: "white" }}>ลบสินค้า</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {selectedRefund.map((product) => (
+                  <TableRow sx={{ whiteSpace: 'nowrap', textAlign: 'center' }} key={product.product_id}>
+                    {/* <TableCell>{product.opid}</TableCell> */}
+                    <TableCell>{product.product_name}</TableCell>
+                    <TableCell>{product.quantity}</TableCell>
+                    <TableCell>{product.unit_price}</TableCell>
+                    <TableCell
+                      style={{
+                        color:
+                          product.status === "refund"
+                            ? "#ffbb00"
+                            : "white",
+                        border: "1px solid #e0e0e0",
+                        padding: "8px",
+                        backgroundColor:
+                          product.status === "refund"
+                            ? "#fff3d1"
+                            : "white",
+                        borderRadius: "5px",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {product.status === "refund"
+                        ? "คืนสินค้า"
+                        : product.status}
+                    </TableCell>
+
+                    <TableCell>
+                      <Button
+                        onClick={() =>
+                          handleConfirmRefundProduct(product.opid, product.order_id)
+                        }
+                        variant="contained"
+                        color="primary"
+                        style={{ backgroundColor: '#397D54' }}
+                      >
+                        ยืนยันการคืนสินค้า
+                      </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() =>
+                          handleRemoveproduct(product.opid, product.order_id)
+                        }
+                        variant="contained"
+                        color="primary"
+                        style={{ backgroundColor: '#3b50ce' }}
+                      >
+                        นำสินค้าออก
+                      </Button>
+                    </TableCell>
+
+
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
 
       {viewReceiptOrderId && (
         <ReceiptDialog

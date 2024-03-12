@@ -64,7 +64,7 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
     onSelect({
       id, name, price: selectedPrice, image, quantity,
       product_qty: adjustedProductQty - quantity,
-      product_cost: selectedCost, product_detail, category, lot, product_lot_id,itemset_id
+      product_cost: selectedCost, product_detail, category, lot, product_lot_id,itemset_id,product_width,product_length,product_thickness
     });
     setOpenSnackbar(true);
 

@@ -421,7 +421,7 @@ console.log('dvdvdvdv'+imageFile)
             </TextField>
           </Grid>
 
-          {(selectedCategory && (selectedCategory.name === 'กระจก' || selectedCategory.name === 'อะลูมิเนียม')) ? (
+          {(selectedCategory && (selectedCategory.name === 'กระจกแยกชิ้น' ||selectedCategory.name === 'กระจก' || selectedCategory.name === 'อะลูมิเนียม')) ? (
             <>
               <Grid item xs={6}>
                 <TextField

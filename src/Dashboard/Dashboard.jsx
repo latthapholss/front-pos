@@ -358,12 +358,10 @@ const Dashboard = () => {
         return colors;
     }
 
-    // Assuming you have a way to determine the number of product types you have
-    const numberOfProductTypes = filteredTopSellingProducts.length; // Replace `productTypes.length` with your actual data source's length
+    const numberOfProductTypes = filteredTopSellingProducts.length; 
     const backgroundColors = generateRandomColors(numberOfProductTypes);
     const hoverBackgroundColors = generateRandomColors(numberOfProductTypes);
 
-    // Then you can use these colors in your chart configuration
     const uniqueProductTypes = filteredTopSellingProducts.reduce((acc, current) => {
         const x = acc.find(item => item.Product_Type === current.Product_Type);
         if (!x) {
@@ -373,34 +371,30 @@ const Dashboard = () => {
         }
     }, []);
 
-    // Generate random colors based on the number of unique product types
 
-    // Step 2: Map to chart data
     const mainColors = [
-        '#2596be', '#07BB1A', '#7809A0', '#37C7B1', '#132a5e', // Bright and vibrant colors
-        '#ADBF00', '#156289', '#33FFD4', '#337BFF', '#9A33FF', // More vibrant colors
-        '#FF3333', '#FF33B1', '#33FF87', '#336FFF', '#E033FF', // Intense colors
-        '#1f8a16', '#347b27', '#498c38', '#5e9e49', '#73af5a', // Shades of green
-        '#007acc', '#0087e6', '#00a0ff', '#33aaff', '#66bbff', // Shades of blue
-        '#e6c825', '#e6d833', '#e6e641', '#e6f450', '#f4fa62', // Shades of yellow
-    
-                ];
-    
+        '#2596be', '#07BB1A', '#7809A0', '#37C7B1', '#132a5e',
+        '#ADBF00', '#156289', '#33FFD4', '#337BFF', '#9A33FF', 
+        '#FF3333', '#FF33B1', '#33FF87', '#336FFF', '#E033FF', 
+        '#1f8a16', '#347b27', '#498c38', '#5e9e49', '#73af5a', 
+        '#007acc', '#0087e6', '#00a0ff', '#33aaff', '#66bbff', 
+        '#e6c825', '#e6d833', '#e6e641', '#e6f450', '#f4fa62', 
+    ];
+
     const dataaaaa = {
         labels: uniqueProductTypes.map((row) => row.Product_Type),
         datasets: [
             {
                 data: uniqueProductTypes.map((row) => row.Total_Sales),
-                backgroundColor: mainColors, // ใช้สีหลักๆที่คุณเลือก
-                hoverBackgroundColor: mainColors, // ใช้สีเดียวกันสำหรับ hover
+                backgroundColor: mainColors, 
+                hoverBackgroundColor: mainColors, 
             },
         ],
     };
-    
+
     const totalSalesSum = filteredTopSellingProducts.reduce((accumulator, currentProduct) => {
         return accumulator + currentProduct.Total_Sales;
-    }, 0); // Initialize the accumulator to 0
-
+    }, 0);
 
 
 
@@ -410,10 +404,10 @@ const Dashboard = () => {
     const [monthlySales, setMonthlySales] = useState([]);
     const [yearlySales, setYearlySales] = useState([]);
 
-    const monthlySalesEndpoint = '/Dashboard/Dashboard'; // เชื่อมโยงกับ URL ของ API ที่เรียกข้อมูลยอดขายรายเดือน
-    const weeklySalesEndpoint = '/Dashboard/Dashboard2'; // เชื่อมโยงกับ URL ของ API ที่เรียกข้อมูลยอดขายรายสัปดาห์
-    const dailySalesEndpoint = '/Dashboard/Dashboard6'; // เชื่อมโยงกับ URL ของ API ที่เรียกข้อมูลยอดขายรายสัปดาห์
-    const yearlySalesEndpoint = '/Dashboard/Dashboard4'; // เชื่อมโยงกับ URL ของ API ที่เรียกข้อมูลยอดขายรายสัปดาห์
+    const monthlySalesEndpoint = '/Dashboard/Dashboard'; 
+    const weeklySalesEndpoint = '/Dashboard/Dashboard2'; 
+    const dailySalesEndpoint = '/Dashboard/Dashboard6'; 
+    const yearlySalesEndpoint = '/Dashboard/Dashboard4'; 
     const handleGetsell = async () => {
         try {
             const yearlySalesResponse = await axios.get(`${ip}${yearlySalesEndpoint}`);
@@ -426,21 +420,17 @@ const Dashboard = () => {
             console.log('วัน:', dailySalesResponse);
             console.log('วัน:', dailySalesData);
 
-            // เรียก API เพื่อดึงข้อมูลยอดขายรายเดือน
             const monthlySalesResponse = await axios.get(`${ip}${monthlySalesEndpoint}`);
             const monthlySalesData = monthlySalesResponse.data;
             console.log('เดือนdsdsd:', monthlySalesResponse);
             console.log('เดือน:', monthlySalesData);
 
-            // เรียก API เพื่อดึงข้อมูลยอดขายรายสัปดาห์
             const weeklySalesResponse = await axios.get(`${ip}${weeklySalesEndpoint}`);
             const weeklySalesData = weeklySalesResponse.data;
             console.log('สัปดาห์:', weeklySalesResponse);
             console.log('สัปดาห์:', weeklySalesData);
 
-            // ตรวจสอบว่าการเรียก API สำเร็จหรือไม่
             if (weeklySalesData.success) {
-                // ถ้าสำเร็จ นำข้อมูลมาใช้งาน
                 setDailySales(dailySalesData.result.map(item => ({
                     day: moment(item.day).format('YYYY-MM-DD'),
                     totalSales: item.totalSales,
@@ -453,19 +443,15 @@ const Dashboard = () => {
                 setYearlySales(yearlySalesData.result);
 
 
-                // ทำสิ่งที่ต้องการกับข้อมูลที่ได้
                 console.log('วัน:', dailySalesData.result);
 
                 console.log('มีข้อมูล:', monthlySalesData.result);
                 console.log('มีข้อมูล:', weeklySalesData.result);
 
-                // สามารถเซ็ตข้อมูลใน state หรือทำงานอื่นต่อไปตามต้องการได้
             } else {
-                // ถ้าไม่สำเร็จ พิมพ์ข้อความเกี่ยวกับข้อมูลที่ไม่คาดคิด
                 console.error('Unexpected data format:', monthlySalesData, weeklySalesData);
             }
         } catch (error) {
-            // หากเกิดข้อผิดพลาดในการเรียก API ให้พิมพ์ข้อความเกี่ยวกับข้อผิดพลาด
             console.error('Error fetching sales data:', error);
         }
     };
@@ -538,14 +524,11 @@ const Dashboard = () => {
             },
         };
     }
-    // ตรวจสอบว่า selectedSalesData ไม่เป็น undefined ก่อนใช้งาน
     else if (timeframe === 'weekly') {
-        // Calculate the last 7 days range
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(endDate.getDate() - 6);
 
-        // Generate a list of dates for the last 7 days
         let dates = [];
         for (let i = 0; i <= 6; i++) {
             const date = new Date(startDate);
@@ -553,7 +536,6 @@ const Dashboard = () => {
             dates.push(moment(date).format('YYYY-MM-DD'));
         }
 
-        // Map over the dates to create chart labels and data
         const labels = dates.map(date => formatThaiDate(date));
         const data = dates.map(date => {
             const sale = dailySales.find(sale => sale.day === date);
@@ -561,11 +543,11 @@ const Dashboard = () => {
         });
 
         chartData = {
-            labels: labels, // Array of labels for each day
+            labels: labels, 
             datasets: [
                 {
                     label: 'ยอดขาย (บาท)',
-                    data: data, // Sales data for each day, including 0 for days without sales
+                    data: data, 
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 2,
@@ -580,38 +562,32 @@ const Dashboard = () => {
         let s = [];
 
         if (timeframe === 'weekly2') {
-            // Populate labels for each day of the week
             for (let i = 0; i < 7; i++) {
                 const dayDate = moment().day(i).format('dddd');
                 labels.push(dayDate);
             }
 
-            // Populate sales data for each day of the week
             salesData = weeklySales.map(entry => entry.totalSales);
             const dates = weeklySales.map(entry => new Date(entry.order_date));
 
-            // นำวันที่ไปหาวันจันทร์ในสัปดาห์นั้น ๆ
             const mondays = dates.map(date => {
-                const day = date.getDay(); // 0 = วันอาทิตย์, 1 = จันทร์, ..., 6 = วันเสาร์
-                const diff = date.getDate() - day + (day === 0 ? -6 : 1); // หาวันจันทร์ของสัปดาห์นั้น ๆ
+                const day = date.getDay(); 
+                const diff = date.getDate() - day + (day === 0 ? -6 : 1); 
                 return new Date(date.setDate(diff));
             });
 
-            // แปลงวันที่ให้กลายเป็นรูปแบบข้อความของวันที่
             const formattedMondays = mondays.map(monday => monday.toLocaleDateString());
             console.log('dateeeeeee:', formattedMondays);
 
         } else if (timeframe === 'monthly') {
-            // Populate labels for each month of the year
             for (let i = 0; i < 12; i++) {
                 const show = moment().startOf('year').month(i).format('MMMM');
                 labels.push(show);
             }
 
-            // Populate sales data for each month of the year
-            salesData = new Array(12).fill(null); // Placeholder for months without sales data
+            salesData = new Array(12).fill(null); 
             monthlySales.forEach(entry => {
-                const monthIndex = parseInt(entry.month, 10) - 1; // Adjust to 0-based index
+                const monthIndex = parseInt(entry.month, 10) - 1; 
                 salesData[monthIndex] = entry.totalSales;
             });
         }
@@ -697,7 +673,6 @@ const Dashboard = () => {
             const startDate = new Date();
             startDate.setDate(endDate.getDate() - 6);
 
-            // Generate a list of dates for the last 7 days
             let dates = [];
             for (let i = 0; i <= 6; i++) {
                 const date = new Date(startDate);
@@ -705,7 +680,6 @@ const Dashboard = () => {
                 dates.push(moment(date).format('YYYY-MM-DD'));
             }
 
-            // Calculate total sales and total profit for the week
             let totalSalesweek = 0;
             let totalProfitForWeek = 0;
 
@@ -713,22 +687,20 @@ const Dashboard = () => {
                 const sale = dailySales.find(sale => sale.day === date);
                 if (sale) {
                     totalSalesweek += sale.totalSales;
-                    totalProfitForWeek += sale.totalProfit; // Assuming sale object has totalProfit property
+                    totalProfitForWeek += sale.totalProfit; 
                 }
             });
 
-            // Update the state with the calculated totals
+            
             setTotalSalesweek(totalSalesweek);
-            setTotalProfitForWeek(totalProfitForWeek); // Assuming you have a useState for totalProfitForWeek
+            setTotalProfitForWeek(totalProfitForWeek); 
         }
-    }, [dailySales, timeframe]); // Add necessary dependencies
+    }, [dailySales, timeframe]); 
 
 
 
 
-    // Handler for when the date selection changes
     const handleDateSelectionChange = (event) => {
-        // Find the sales data for the selected date
         const salesDataForSelectedDate = dailySales.find(salesData => salesData.day === event.target.value);
         setSelectedSalesData(salesDataForSelectedDate);
     };
@@ -737,14 +709,16 @@ const Dashboard = () => {
 
     moment.locale('th');
     function formatThaiDate(dateString) {
-        // ใช้วันที่จากข้อมูลที่ได้รับและจัดรูปแบบตามที่ต้องการ
+        moment.locale('th');
+
         return moment(dateString).format('dddd ที่ D MMMM YYYY');
     }
+    
     const startOfWeek = new Date();
     startOfWeek.setHours(0, 0, 0, 0);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Set to Sunday of this week
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); 
     const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // Set to Saturday of this week
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
 
     const totalSalesForWeek = dailySales
         .filter(sale => new Date(sale.day) >= startOfWeek && new Date(sale.day) <= endOfWeek)
@@ -754,10 +728,10 @@ const Dashboard = () => {
         .filter(sale => new Date(sale.day) >= startOfWeek && new Date(sale.day) <= endOfWeek)
         .reduce((total, sale) => total + sale.totalOrders, 0);
     // const totalProfitForWeek = dailySales
-    //     .filter(sale => new Date(sale.day) >= startOfWeek && new Date(sale.day) <= endOfWeek) // กรองข้อมูลในช่วงสัปดาห์
-    //     .reduce((total, sale) => total + sale.totalProfit, 0); // คำนวณผลรวมของกำไรทั้งหมด
+    //     .filter(sale => new Date(sale.day) >= startOfWeek && new Date(sale.day) <= endOfWeek) 
+    //     .reduce((total, sale) => total + sale.totalProfit, 0); 
 
-    console.log('fadfSDfzsdfgghrehreshserhesrh', totalProfitForWeek); // แสดงค่า totalProfit ทั้งหมดของรายสัปดาห์นี้
+    console.log('fadfSDfzsdfgghrehreshserhesrh', totalProfitForWeek); 
 
 
 
@@ -786,12 +760,12 @@ const Dashboard = () => {
             </Box>
             <Box sx={{ margin: '15px', backgroundColor: 'white', borderRadius: 3, padding: '20px' }}>
                 <div className="dashboard-container"  >
-                    <Card className="sales-card" style={{ backgroundColor: '#009ae1', color: 'white', borderRadius: '10px', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.2)' }}>
+                <Card className="sales-card" style={{ backgroundColor: '#009ae1', color: 'white', borderRadius: '10px', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.2)' }}>
                         <CardContent>
-                            <Typography variant="h5">ยอดขายวันนี้</Typography>
+                            <Typography variant="h5">สมาชิก</Typography>
                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                                 <AccountCircleIcon style={{ fontSize: '40px', marginRight: '10px' }} />
-                                <Typography variant="h4">{dailySales.reduce((total, entry) => total + entry.totalSales, 0)}</Typography>
+                                <Typography variant="h4">{memberCount.toLocaleString()}</Typography>
                             </div>
                         </CardContent>
                     </Card>
@@ -835,8 +809,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">ยอดขายทั้งหมด</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <AttachMoneyIcon style={{ fontSize: '40px', marginRight: '10px' }} />
-                                    {/* หากคุณต้องการแสดงผลรวม, คุณควรใช้ reduce หรือวิธีการอื่นในการคำนวณผลรวม */}
                                     <Typography variant="h4">{selectedSalesData.totalSales}  ฿</Typography>
                                 </div>
                             </CardContent>
@@ -846,8 +818,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">ยอดขายทั้งหมด</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <AttachMoneyIcon style={{ fontSize: '40px', marginRight: '10px' }} />
-                                    {/* ตรวจสอบให้แน่ใจว่า yearlySales เป็น array และคำนวณผลรวมถูกต้อง */}
                                     <Typography variant="h4">{totalSalesweek} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -858,8 +828,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">ยอดขายทั้งหมด</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <AttachMoneyIcon style={{ fontSize: '40px', marginRight: '10px' }} />
-                                    {/* ตรวจสอบให้แน่ใจว่า yearlySales เป็น array และคำนวณผลรวมถูกต้อง */}
                                     <Typography variant="h4">{yearlySales.reduce((total, entry) => total + entry.totalSales, 0)} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -871,7 +839,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">กำไร</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <MonetizationOnIcon style={{ fontSize: '40px', marginRight: '10px' }} />
                                     <Typography variant="h4">{selectedSalesData.totalProfit} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -881,7 +848,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">กำไร</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <MonetizationOnIcon style={{ fontSize: '40px', marginRight: '10px' }} />
                                     <Typography variant="h4">{totalProfitForWeek} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -891,7 +857,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">กำไร</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <MonetizationOnIcon style={{ fontSize: '40px', marginRight: '10px' }} />
                                     <Typography variant="h4">{Math.round(monthlySales.reduce((total, entry) => total + entry.totalProfit, 0))} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -901,7 +866,6 @@ const Dashboard = () => {
                             <CardContent>
                                 <Typography variant="h5">กำไร</Typography>
                                 <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-                                    <MonetizationOnIcon style={{ fontSize: '40px', marginRight: '10px' }} />
                                     <Typography variant="h4">{Math.round(yearlySales.reduce((total, entry) => total + entry.totalProfit, 0))} ฿</Typography>
                                 </div>
                             </CardContent>
@@ -911,77 +875,77 @@ const Dashboard = () => {
                 </div>
             </Box>
 
-      
-                
 
 
 
 
-                <Box
-                  sx={{
+
+            <Grid container sx={{ flexDirection: 'column' }}>
+            <Box
+                sx={{
                     margin: '15px',
                     backgroundColor: 'white',
                     borderRadius: 3,
-                    width: '1200px',
+                    width: 'auto',
                     height: 'auto',
                     float: 'right',
                     padding: '25px',
                     overflow: 'auto',
-          
+
                 }}
-                >
-                    <Grid container alignItems="center">
-                        <Typography variant="h4" fontWeight="bold" fontSize="20px">
-                            ยอดขาย
-                            {timeframe === 'yearly' && (
-                                <span>รายปี</span>
-                            )}
-                            {/* {timeframe === 'daily' && (
+            >
+                <Grid container alignItems="center">
+                    <Typography variant="h4" fontWeight="bold" fontSize="20px">
+                        ยอดขาย
+                        {timeframe === 'yearly' && (
+                            <span>รายปี</span>
+                        )}
+                        {/* {timeframe === 'daily' && (
                                 <span>รายวัน</span>
                             )} */}
-                            {timeframe === 'weekly' && (
-                                <span>รายสัปดาห์</span>
-                            )}
-                            {timeframe === 'monthly' && (
-                                <span>รายเดือน</span>
-                            )}
-
-                        </Typography>
-
-                        <Select
-                            value={timeframe}
-                            onChange={(event) => setTimeframe(event.target.value)}
-                            sx={{ marginTop: '10px', marginBottom: '20px', marginLeft: '10px' }}
-                        >
-                            {/* <MenuItem value="daily">ยอดขายรายวัน</MenuItem> */}
-
-                            <MenuItem value="weekly">ยอดขายรายสัปดาห์</MenuItem>
-                            <MenuItem value="monthly">ยอดขายรายเดือน</MenuItem>
-                            <MenuItem value="yearly">ยอดขายรายปี</MenuItem>
-                        </Select>
-                        {timeframe === 'daily' && (
-                            <div >
-                                <Box sx={{ minWidth: 160, marginBottom: 1.3, paddingLeft: 2 }}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="daily-sales-select-label">Select Date</InputLabel>
-                                        <Select
-                                            labelId="daily-sales-select-label"
-                                            id="daily-sales-select"
-                                            onChange={handleDateSelectionChange}
-                                            label="Select Date"
-                                            sx={{ height: '55px', width: 280, backgroundColor: '#fff', "& .MuiSvgIcon-root": { color: "#000" } }} // Adjust height and background color here
-                                        >
-                                            {dailySales.map((entry, index) => (
-                                                <MenuItem key={index} value={entry.day}>{formatThaiDate(entry.day)}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Box>
-
-                            </div>
-
+                        {timeframe === 'weekly' && (
+                            <span>รายสัปดาห์</span>
                         )}
-                        {/* {timeframe === 'weekly' && (
+                        {timeframe === 'monthly' && (
+                            <span>รายเดือน</span>
+                        )}
+
+                    </Typography>
+
+                    <Select
+                        value={timeframe}
+                        onChange={(event) => setTimeframe(event.target.value)}
+                        sx={{ marginTop: '10px', marginBottom: '20px', marginLeft: '10px' }}
+                    >
+                        {/* <MenuItem value="daily">ยอดขายรายวัน</MenuItem> */}
+
+                        <MenuItem value="weekly">ยอดขายรายสัปดาห์</MenuItem>
+                        <MenuItem value="monthly">ยอดขายรายเดือน</MenuItem>
+                        <MenuItem value="yearly">ยอดขายรายปี</MenuItem>
+                    </Select>
+                    {timeframe === 'daily' && (
+                        <div >
+                            <Box sx={{ minWidth: 160, marginBottom: 1.3, paddingLeft: 2 }}>
+                                <FormControl fullWidth>
+                                    <InputLabel id="daily-sales-select-label">Select Date</InputLabel>
+                                    <Select
+                                        labelId="daily-sales-select-label"
+                                        id="daily-sales-select"
+                                        onChange={handleDateSelectionChange}
+                                        label="Select Date"
+                                        sx={{ height: '55px', width: 280, backgroundColor: '#fff', "& .MuiSvgIcon-root": { color: "#000" } }} // Adjust height and background color here
+                                    >
+                                        {dailySales.map((entry, index) => (
+                                            <MenuItem key={index} value={entry.day}>{formatThaiDate(entry.day)}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+
+                        </div>
+
+                    )}
+                    {/* {timeframe === 'weekly' && (
                             <div>
                                 <Box sx={{ minWidth: 160, marginBottom: 2, display: 'flex', gap: '10px', paddingLeft: 2 }}>
                                     <div>
@@ -1011,144 +975,141 @@ const Dashboard = () => {
                                 </Box>
                             </div>
                         )} */}
-                        {/* {(startDate && endDate) && (
+                    {/* {(startDate && endDate) && (
     <div> {formatThaiDate(startDate)} to {formatThaiDate(endDate)}: {totalSalesForRange}</div>
 )} */}
 
 
-                    </Grid>
+                </Grid>
 
-                    <Bar
-                        data={chartData}
-                        options={chartOptions}
-                    />
-
-
+                <Bar
+                    data={chartData}
+                    options={chartOptions}
+                />
 
 
 
 
 
-                    {console.log('Chart rendered')}
-                </Box>
-         
+
+
+                {console.log('Chart rendered')}
+            </Box>
+
             <Box
-                    sx={{
-                        margin: '15px',
-                        backgroundColor: 'white',
-                        borderRadius: 3,
-                        width: 'auto', // Set the width to 100%
-                        height: 'auto', // Set the height as needed
-                        overflow: 'auto',
-                        padding: '20px',
-                    }}
-                >
-                    <TableContainer component={Paper}>
-                        <Table aria-label="simple table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell colSpan={5} align="left" style={{ fontWeight: 'bold', fontSize: '20px' }}>
-                                        สินค้าขายดี
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell align="left"><strong>รหัสสินค้า</strong></TableCell>
-                                    <TableCell align="left">
-                                        <strong>
-                                            <TableSortLabel
-                                                active={sortConfig.field === 'Product_Name'}
-                                                direction={sortConfig.field === 'Product_Name' ? sortConfig.order : 'asc'}
-                                                onClick={() => handleSort2('Product_Name')}
-                                            >
-                                                ชื่อสินค้า
-                                            </TableSortLabel>
-                                        </strong>
-                                    </TableCell>
-                                    <TableCell align="left"><strong>ประเภทสินค้า</strong></TableCell>
-                                    <FormControl sx={{ m: 1, minWidth: 120 }}>
-
-                                        <InputLabel id="stock-filter-select-label">สถานะสินค้า</InputLabel>
-                                        <Select
-                                            labelId="stock-filter-select-label"
-                                            id="stock-filter-select"
-                                            value={stockFilter}
-                                            label="สถานะสินค้า"
-                                            onChange={handleStockFilterChange}
+                sx={{
+                    margin: '15px',
+                    backgroundColor: 'white',
+                    borderRadius: 3,
+                    width: 'auto', // Set the width to 100%
+                    height: 'auto', // Set the height as needed
+                    overflow: 'auto',
+                    padding: '20px',
+                }}
+            >
+                <TableContainer component={Paper}>
+                    <Table aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell colSpan={5} align="left" style={{ fontWeight: 'bold', fontSize: '20px' }}>
+                                    สินค้าขายดี
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell align="left">
+                                    <strong>
+                                        <TableSortLabel
+                                            active={sortConfig.field === 'Product_Name'}
+                                            direction={sortConfig.field === 'Product_Name' ? sortConfig.order : 'asc'}
+                                            onClick={() => handleSort2('Product_Name')}
                                         >
-                                            <MenuItem value="All">ทั้งหมด</MenuItem>
-                                            <MenuItem value="In Stock">สินค้าในคลัง</MenuItem>
-                                            <MenuItem value="Low Stock">ใกล้หมด</MenuItem>
-                                            <MenuItem value="Out of Stock">หมด</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                    <TableCell>
+                                            ชื่อสินค้า
+                                        </TableSortLabel>
+                                    </strong>
+                                </TableCell>
+                                <TableCell align="left"><strong>ประเภทสินค้า</strong></TableCell>
+                                <FormControl sx={{ m: 1, minWidth: 120 }}>
+
+                                    <InputLabel id="stock-filter-select-label">จำนวนสินค้าในคลัง</InputLabel>
+                                    <Select
+                                        labelId="stock-filter-select-label"
+                                        id="stock-filter-select"
+                                        value={stockFilter}
+                                        label="จำนวนสินค้าในคลัง"
+                                        onChange={handleStockFilterChange}
+                                    >
+                                        <MenuItem value="All">ทั้งหมด</MenuItem>
+                                        <MenuItem value="In Stock">สินค้าในคลัง</MenuItem>
+                                        <MenuItem value="Low Stock">ใกล้หมด</MenuItem>
+                                        <MenuItem value="Out of Stock">หมด</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <TableCell>
                                     <strong>จำนวนออเดอร์ที่ขายได้</strong>
-            
-                                    </TableCell>
 
+                                </TableCell>
+
+                                <TableCell align="left">
+                                    <strong>
+                                        <TableSortLabel
+                                            active={true}
+                                            direction={sortOrder}
+                                            onClick={handleSort}
+                                        >
+                                            ยอดขายทั้งหมด
+                                        </TableSortLabel>
+                                    </strong>
+                                </TableCell>
+                            </TableRow>
+
+
+
+                        </TableHead>
+                        <TableBody>
+                            {filteredTopSellingProducts.map((row) => (
+                                <TableRow key={row.Product_ID}>
+                                    <TableCell align="left">{row.Product_Name}</TableCell>
                                     <TableCell align="left">
-                                        <strong>
-                                            <TableSortLabel
-                                                active={true}
-                                                direction={sortOrder}
-                                                onClick={handleSort}
-                                            >
-                                                ยอดขายทั้งหมด
-                                            </TableSortLabel>
-                                        </strong>
+                                        {clickedProductType === row.Product_Type ? (
+                                            <strong>{row.Product_Type}</strong>
+                                        ) : (
+                                            <span onClick={() => handleClickProductType(row.Product_Type)}>{row.Product_Type}</span>
+                                        )}
                                     </TableCell>
+                                    <TableCell
+                                        align="left"
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
+                                            backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
+                                        }}
+                                    >
+                                        {row.Product_Lot_Quantity <= 0 ? 'หมด' : row.Product_Lot_Quantity}
+                                    </TableCell>
+
+                                    <TableCell
+                                        align="left"
+                                        style={{
+                                            // fontWeight: 'bold',
+                                            // color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
+                                            // backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
+                                        }}
+                                    >
+
+                                        {row.Stock}
+
+                                    </TableCell>
+
+                                    <TableCell align="left">{row.Total_Sales.toLocaleString()}</TableCell>
                                 </TableRow>
+                            ))}
+                        </TableBody>
 
+                    </Table>
+                </TableContainer>
 
-
-                            </TableHead>
-                            <TableBody>
-                                {filteredTopSellingProducts.map((row) => (
-                                    <TableRow key={row.Product_ID}>
-                                        <TableCell component="th" scope="row">
-                                            {row.sNo}
-                                        </TableCell>
-                                        <TableCell align="left">{row.Product_Name}</TableCell>
-                                        <TableCell align="left">
-                                            {clickedProductType === row.Product_Type ? (
-                                                <strong>{row.Product_Type}</strong>
-                                            ) : (
-                                                <span onClick={() => handleClickProductType(row.Product_Type)}>{row.Product_Type}</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell
-                                            align="left"
-                                            style={{
-                                                fontWeight: 'bold',
-                                                color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
-                                                backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
-                                            }}
-                                        >
-                                            {row.Product_Lot_Quantity <= 0 ? 'หมด' : row.Product_Lot_Quantity}
-                                        </TableCell>
-
-                                        <TableCell
-                                            align="left"
-                                            style={{
-                                                // fontWeight: 'bold',
-                                                // color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
-                                                // backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
-                                            }}
-                                        >
-
-                                            {row.Stock}
-
-                                        </TableCell>
-
-                                        <TableCell align="left">{row.Total_Sales.toLocaleString()}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-
-                        </Table>
-                    </TableContainer>
-
-                </Box>
+            </Box>
+            </Grid>
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
 
                 <Box sx={{

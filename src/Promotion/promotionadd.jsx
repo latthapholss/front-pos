@@ -336,37 +336,29 @@ function Promotionadd({ person }) {
   };
 
   const handleSwitchChange = (promotion_id) => {
-    // Create a copy of promotions to avoid directly mutating the state
     const updatedPromotions = [...promotions];
 
-    // Find the index of the promotion to toggle
     const promoIndex = updatedPromotions.findIndex(
       (obj) => obj.id === promotion_id
     );
 
-    // Toggle the is_active status based on the current value
     updatedPromotions[promoIndex].is_active =
       updatedPromotions[promoIndex].is_active === 1 ? 0 : 1;
 
-    // Update the state with the modified promotions
     setPromotions(updatedPromotions);
 
-    // Update the currentItems if needed
     const _currentItems = updatedPromotions.slice(
       indexOfFirstItem,
       indexOfLastItem
     );
     setCurrentItems(_currentItems);
 
-    // Make the API request to update the status on the server
     axios
       .get(`${ip}/promotion/switchactive/${promotion_id}`)
       .then((response) => {
         if (response.data.success) {
-          // Handle the success response from the server if needed.
           console.log("Promotion status updated on the server.");
         } else {
-          // Handle any error response from the server.
           console.error(
             "Error toggling promotion status on the server:",
             response.data.message
@@ -374,7 +366,6 @@ function Promotionadd({ person }) {
         }
       })
       .catch((error) => {
-        // Handle network or other errors.
         console.error("Error making server request:", error);
       });
   };
@@ -394,7 +385,7 @@ function Promotionadd({ person }) {
           sx={{
             color: "#333335",
             marginTop: "20px",
-            fontSize: "24px", // Add this line for the border // Add some padding for space around the text
+            fontSize: "24px", 
             marginLeft: "20px",
             height: "50px",
             borderRadius: 2,
@@ -441,14 +432,6 @@ function Promotionadd({ person }) {
               >
                 โปรโมชั่น
               </Typography>
-              <Button
-                sx={{ backgroundColor: "#28bc94", marginRight: "20px" }}
-                variant="contained"
-                // startIcon={<AddIcon />}
-                onClick={NavigateItemset}
-              >
-                ชุดสินค้า
-              </Button>
             </Grid>
 
             <Paper
