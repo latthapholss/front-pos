@@ -102,7 +102,7 @@ export default function ReceiptDialog({ open, handleClose, orderId }) {
           <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ width: '150px' }}>
               <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
-              ร้านเมืองทองกระจกอลูมิเนียม
+              ร้านเมืองทองกระจกอะลูมิเนียม
 
               </Typography>
               <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>

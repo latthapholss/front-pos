@@ -16,7 +16,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
+  DialogActions, Input,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -42,6 +42,8 @@ import {
 } from "../Static/api";
 // Import external CSS file
 import axios from 'axios';
+import Swal from "sweetalert2";
+import { message } from 'antd';
 
 function AdminCategories({ person }) {
   const [categories, setCategories] = useState([]);
@@ -113,17 +115,21 @@ function AdminCategories({ person }) {
             };
             setCategories([...categories, newCategory]);
             setOpenCategoryDialog(false);
-            alert(res.data.message);
+            Swal.fire({
+              icon: 'success',
+              title: 'เพิ่มประเภทสินค้าสำเร็จ',
+
+            });
           } else {
-            alert(res.data.message);
+            message(res.data.message);
           }
         })
         .catch((error) => {
           console.error('Error during save category:', error);
-          alert('An error occurred while saving the category.');
+          message.error('ข้อผิดพลาดเกิดขึ้นขณะที่บันทึกประเภทสินค้า');
         });
     } else {
-      alert('Fill in all required fields.');
+      message.error('กรอกข้อมูลให้ครบถ้วน');
     }
 
     console.log('Exiting handleSaveCategory');
@@ -158,28 +164,38 @@ function AdminCategories({ person }) {
           category.id === categoryId ? { ...category, is_active: 0 } : category
         );
         setCategories(updatedCategories);
-        alert(res.message);
-
+        Swal.fire({
+          title: "ลบประเภทสินค้าเสร็จสิ้น !",
+          text: res.message,
+          icon: "success"
+        });
+  
         // ดึงข้อมูลประเภทสินค้าใหม่และอัปเดต state
         handleGetCategory();
       } else {
-        alert(res.message);
+        Swal.fire({
+          title: "Error!",
+          text: res.message,
+          icon: "error"
+        });
       }
     });
   };
-
   const handleUpdateUnit = () => {
     if (unitName && editUnitId) {
       const object = {
-        unit_id: editUnitId, // Include the unit_id in the body, not in the URL
-        new_unit: unitName   // Use the key 'new_unit' as per your JSON structure
+        unit_id: editUnitId,
+        new_unit: unitName
       };
-
-      // Note that EditedUnit should be a URL path that does not include a path parameter for the unit_id
-      const url = EditedUnit; // Assuming this does not include ':unit_id'
-
-      put(url, object) // We have removed the token parameter
+  
+      // EditedUnit should be a URL path that does not include a path parameter for the unit_id
+      const url = EditedUnit; // Exclude the editUnitId from the URL path
+  
+      console.log('Sending update unit request:', url, object); // Add console.log() here
+  
+      put(url, object) // Pass the editUnitId as part of the request body
         .then((res) => {
+          console.log('Response from update unit request:', res); // Add console.log() here
           if (res.success) {
             // Update the local state to reflect the changes
             const updatedUnits = units.map((unit) => {
@@ -190,24 +206,30 @@ function AdminCategories({ person }) {
             });
             setUnits(updatedUnits);
             setOpenEditUnitDialog(false);
-            alert(res.message);
+            Swal.fire({
+              icon: 'success',
+              title: 'อัพเดทหน่วยสินค้าสำเร็จ',
+            });
           } else {
-            alert(res.message);
+            message.error(res.message);
           }
         })
         .catch((error) => {
           console.error('Error during update unit:', error);
-          alert('An error occurred while updating the unit.');
+          message.error('An error occurred while updating the unit.');
         });
     } else {
-      alert('The unit name cannot be empty.');
+      message.error('กรุณากรอกข้อมูลให้ครบ');
     }
   };
+  
+  
+
 
 
   const handleUpdateCategory = () => {
     if (!selectedCategory || !categoryName) {
-      alert('Please select a category and enter a name.');
+      message.error('Please select a category and enter a name.');
       return;
     }
 
@@ -232,18 +254,22 @@ function AdminCategories({ person }) {
       .then((response) => {
         if (response.data.success) {
           setOpenEditCategoryDialog(false);
-          alert('Category updated successfully.');
+          Swal.fire({
+            icon: 'success',
+            title: 'อัพเดทข้อมูลเสร็จสิ้น',
+          }).then(() => {
+            handleGetCategory(); // Refresh the category list
+          });
           handleGetCategory(); // Refresh the category list
         } else {
-          alert('Failed to update category: ' + response.data.message);
+          message.error('Failed to update category: ' + response.data.message);
         }
       })
       .catch((error) => {
         console.error('Error during update category:', error);
-        alert('An error occurred while updating the category.');
+        message.error('An error occurred while updating the category.');
       });
   };
-
 
   const handleAddUnit = () => {
     setOpenUnitDialog(true);
@@ -260,13 +286,16 @@ function AdminCategories({ person }) {
           setUnits([...units, newUnit]);
           setUnitName("");
           setOpenUnitDialog(false);
-          alert(res.message);
+          Swal.fire({
+            icon: 'success',
+            title: 'เพิ่มประเภทสินค้าสำเร็จ',
+          });
         } else {
-          alert(res.message);
+          message.error(res.message);
         }
       });
     } else {
-      alert("กรอกข้อมูลก่อน");
+      message.error("กรอกข้อมูลก่อน");
     }
   };
 
@@ -286,6 +315,7 @@ function AdminCategories({ person }) {
     });
   };
 
+
   const handleDeleteUnit = (unitId) => {
     post({ unit_id: unitId }, DELETEUNIT).then((res) => {
       if (res.success) {
@@ -293,16 +323,22 @@ function AdminCategories({ person }) {
           unit.id === unitId ? { ...unit, is_active: 0 } : unit
         );
         setUnits(updatedUnits);
-        alert(res.message);
-
+        Swal.fire({
+          title: "ลบหน่วยสินค้าเสร็จสิ้น !",
+          icon: "success"
+        });
+  
         // ดึงข้อมูลหน่วยสินค้าใหม่และอัปเดต state
         handleGetUnit();
       } else {
-        alert(res.message);
+        Swal.fire({
+          title: "ผิดพลาด!",
+          text: res.message,
+          icon: "error"
+        });
       }
     });
   };
-
 
 
   // Pagination Logic for Categories
@@ -476,18 +512,20 @@ function AdminCategories({ person }) {
                 open={openCategoryDialog}
                 onClose={() => setOpenCategoryDialog(false)}
               >
-                <DialogTitle>{"Add Product Type"}</DialogTitle>
+                <DialogTitle>{"เพิ่มประเภทสินค้า"}</DialogTitle>
                 <DialogContent>
                   <TextField
-                    label="Product Type Name"
+                    label="ชื่อประเภทสินค้า"
                     value={categoryName}
                     onChange={(e) => setCategoryName(e.target.value)}
                     fullWidth
                   />
-                  <input
+                  <Input
                     type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
+                    inputProps={{
+                      accept: 'image/*',
+                      onChange: handleFileChange,
+                    }}
                   />
                 </DialogContent>
                 <DialogActions>
@@ -645,7 +683,7 @@ function AdminCategories({ person }) {
           <TextField
             autoFocus
             margin="dense"
-            label="Category Name"
+            label="ชื่อประเภทสินค้า"
             type="text"
             fullWidth
             variant="outlined"

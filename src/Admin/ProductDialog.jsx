@@ -247,9 +247,10 @@ const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
 
   const handleImageUpload = (event) => {
     const imageFile = event.target.files[0];
+    console.log('dvdvdvdv'+imageFile)
 
     setSelectedImage(imageFile);
-
+console.log('dvdvdvdv'+imageFile)
   };
 
 
@@ -420,7 +421,7 @@ const ProductDialog = ({ open, person, onClose, onSave, handleGetProduct }) => {
             </TextField>
           </Grid>
 
-          {(selectedCategory && (selectedCategory.name === 'กระจก' || selectedCategory.name === 'อลูมิเนียม')) ? (
+          {(selectedCategory && (selectedCategory.name === 'กระจก' || selectedCategory.name === 'อะลูมิเนียม')) ? (
             <>
               <Grid item xs={6}>
                 <TextField

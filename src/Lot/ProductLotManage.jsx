@@ -340,7 +340,7 @@ export default function ProductLotManage() {
                     <DialogContentText>
                         กรุณากรอกข้อมูลล็อตสินค้าใหม่:
                     </DialogContentText>
-                    <TextField
+                    {/* <TextField
                         autoFocus
                         margin="dense"
                         label=""
@@ -350,7 +350,7 @@ export default function ProductLotManage() {
                         disabled // เพิ่ม prop disabled เพื่อทำให้ TextField นี้ไม่สามารถแก้ไขได้
                         onChange={(e) => setNewLot({ ...newLot, lot_number: e.target.value })}
                     />
-
+ */}
                     <TextField
                         margin="dense"
                         label="วันเพิ่มล็อต"

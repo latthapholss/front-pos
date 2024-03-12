@@ -1,7 +1,7 @@
 const is_prod = false
 
 const version = '/api/v1'
-export const backend_dns = (is_prod ? '' : 'http://localhost:4000')
+export const backend_dns = is_prod ? '' : 'http://10.199.7.12:4000';
 export const WEBSITE = is_prod ? '' : 'http://localhost:3000';
 export const ip = backend_dns + version;
 
@@ -139,3 +139,4 @@ export const getitemset='/apriori/aprioripair'
 export const gettwoproduct='/itemset/twoproduct'
 export const additemset='/itemset/additemset'
 export const getProductItemSet='/itemset'
+export const geteditProductItemSet='/itemset/edititemset'

@@ -112,16 +112,12 @@ const CashierPage = ({ person }) => {
           id: item.product_type_id,
           type: item.product_type,
           image: item.product_type_image
-            ? `http://localhost:4000/static/product_type/${encodeURIComponent(item.product_type_image)}`
-            : 'http://localhost:4000/placeholder-for-missing-image.jpg',
+            ? `http://10.199.7.12:4000/static/product_type/${encodeURIComponent(item.product_type_image)}`
+            : 'http://10.199.7.12:4000/placeholder-for-missing-image.jpg',
           isActive: item.is_active,
         }));
 
         console.log('111', modifiedData);
-
-
-
-
 
         // Set the modified data in the state
         setCategories(modifiedData);
@@ -131,6 +127,7 @@ const CashierPage = ({ person }) => {
       console.error('Error fetching categories:', error);
     }
   };
+
 
   const HandleUserDetail = async () => {
     try {
@@ -251,7 +248,7 @@ const CashierPage = ({ person }) => {
 
   const selectProduct = (product) => {
     // Check if the product category is 'กระจก' (glass).
-    if (product.category === 'กระจก'||product.category === 'อลูมิเนียม') {
+    if (product.category === 'กระจก'||product.category === 'อะลูมิเนียม') {
       // Create a new product object with a unique identifier to ensure it's added as a new item.
       // You might use a combination of the original product ID and a timestamp or a counter for uniqueness.
       const newProduct = {

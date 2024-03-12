@@ -468,7 +468,7 @@ function MemberManagement({ person }) {
                           sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
                         >
                           <Typography variant="caption" sx={{ marginRight: 2 }}>
-                            Rows per page:
+                            จำนวนแถวต่อหน้า:
                           </Typography>
                           <Select
                             value={rowsPerPage}
@@ -476,9 +476,9 @@ function MemberManagement({ person }) {
                             variant="outlined"
                             sx={{ marginRight: 2 }}
                           >
-                            <MenuItem value={10}>10 rows</MenuItem>
-                            <MenuItem value={20}>20 rows</MenuItem>
-                            <MenuItem value={30}>30 rows</MenuItem>
+                            <MenuItem value={10}>10 แถว</MenuItem>
+                            <MenuItem value={20}>20 แถว</MenuItem>
+                            <MenuItem value={30}>30 แถว</MenuItem>
                           </Select>
                           <Typography variant="caption" sx={{ marginRight: 2 }}>
                             {`${indexOfFirstItem + 1}–${Math.min(indexOfLastItem, members.length)} of ${members.length}`}

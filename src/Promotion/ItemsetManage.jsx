@@ -1,4 +1,8 @@
 import {
+  Dialog,
+  DialogContent,
+  DialogActions,
+  DialogTitle,
   Paper,
   Table,
   TableHead,
@@ -16,8 +20,10 @@ import {
   Select,
   Pagination,
   MenuItem,
+  TextField, // Import TextField for input fields in the dialog
 } from "@mui/material";
-
+import { message } from "antd";
+import Swal from "sweetalert2";
 import AddIcon from "@mui/icons-material/Add";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -28,15 +34,21 @@ export default function ItemsetManage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [indexOfFirstItem, setIndexOfFirstItem] = useState(0);
+  const [selectedItemSet, setSelectedItemSet] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const indexOfLastItem = Math.min(currentPage * rowsPerPage, itemset.length);
   const navigate = useNavigate();
   const NavigateItemset = () => {
     navigate("/promotion/promotionitemset");
   };
   const handleChangeRowsPerPage = (event) => {
-    const newRowsPerPage = +event.target.value;
-    setRowsPerPage(newRowsPerPage);
-    const newPage = Math.ceil((indexOfFirstItem + 1) / newRowsPerPage);
+    const newItemsPerPage = +event.target.value;
+    setRowsPerPage(newItemsPerPage);
+    const newPage = Math.ceil((indexOfFirstItem + 1) / newItemsPerPage);
+    const newIndexOfFirstItem = (newPage - 1) * newItemsPerPage;
     setCurrentPage(newPage);
+    setIndexOfFirstItem(newIndexOfFirstItem);
+    handleGet(); // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
   };
 
   useEffect(() => {
@@ -46,15 +58,13 @@ export default function ItemsetManage() {
   const handleSwitchChange = (id) => {
     // เขียนโค้ดเพื่อปรับเปลี่ยนสถานะการใช้งานของ promotion ด้วย id ที่รับมา
   };
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const handleOpenEditDialog = (promotionData) => {
-    // เขียนโค้ดเพื่อเปิด dialog สำหรับแก้ไข promotion
+  const handleOpenEditDialog = (itemsetData) => {
+    setSelectedItemSet(itemsetData);
+    setEditDialogOpen(true);
   };
-  const indexOfLastItem = currentPage * rowsPerPage;
 
-  const handleDeletePromotion = (id) => {
-    // เขียนโค้ดเพื่อลบ promotion ด้วย id ที่รับมา
-  };
   async function handleGet() {
     try {
       const myHeaders = new Headers();
@@ -94,10 +104,81 @@ export default function ItemsetManage() {
 
   const handleChangePage = (event, newPage) => {
     setCurrentPage(newPage);
+    const newIndexOfFirstItem = (newPage - 1) * rowsPerPage;
+    setIndexOfFirstItem(newIndexOfFirstItem);
+    handleGet(); // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
   };
-  const itemsPerPage = 10;
+
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
+  };
+  const handleSaveChanges = async () => {
+    if (!selectedItemSet) {
+      console.error("No item set selected for editing");
+      return;
+    }
+
+    // Check if any of the fields are empty
+
+    if (
+      selectedItemSet.itemset_name === "" ||
+      selectedItemSet.itemset_detail === "" ||
+      selectedItemSet.itemset_qty === ""
+    ) {
+      // Display an Ant Design Alert if any field is empty
+      message.error("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+      return;
+    }
+
+    // Log details of the item set being edited
+    console.log("Editing item set with details:", {
+      itemset_name: selectedItemSet.itemset_name,
+      itemset_detail: selectedItemSet.itemset_detail,
+      itemset_price: selectedItemSet.itemset_price,
+      itemset_qty: selectedItemSet.itemset_qty,
+      itemset_id: selectedItemSet.itemset_id,
+    });
+
+    // Assuming ip is your base API URL and geteditProductItemSet is your API endpoint for editing an item set
+    // You might need to replace some placeholder or append item set ID in the endpoint as necessary
+    const updateEndpoint = `${ip}/itemset/updateitemset/${selectedItemSet.itemset_id}`;
+    console.log(updateEndpoint);
+    try {
+      const response = await fetch(updateEndpoint, {
+        method: "PUT", // or 'PATCH' as required by your API
+        headers: {
+          "Content-Type": "application/json",
+          // Add Authorization header if needed
+        },
+        body: JSON.stringify({
+          itemset_id: selectedItemSet.itemset_id,
+          itemset_name: selectedItemSet.itemset_name,
+          itemset_detail: selectedItemSet.itemset_detail,
+          itemset_price: selectedItemSet.itemset_price,
+          itemset_qty: selectedItemSet.itemset_qty,
+          // Include other fields as necessary
+        }),
+      });
+
+      if (!response.ok) {
+        message.error(`สินค้าไม่เพียงพอ: ${response.statusText}`);
+      } else {
+        const updatedItemSet = await response.json();
+        console.log("Successfully updated item set:", updatedItemSet);
+
+        // Close the editing dialog and refresh the list of item sets
+        setEditDialogOpen(false);
+        handleGet(); // This function should fetch the latest list of item sets from your API to update the UI
+        Swal.fire({
+          icon: "success",
+          title: "แก้ไขสินค้าสำเร็จ",
+          text: "ข้อมูลของสินค้าถูกอัปเดตแล้ว",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating item set:", error);
+      // Optionally, display an error message to the user
+    }
   };
 
   return (
@@ -189,35 +270,27 @@ export default function ItemsetManage() {
                       จำนวนชุดสินค้า
                     </TableCell>
                     <TableCell style={{ color: "white" }}>แก้ไข</TableCell>
-                    <TableCell style={{ color: "white" }}>ลบ</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {itemset.map((itemsetData, index) => (
-                    <TableRow key={itemsetData.itemset_id}>
-                      <TableCell>{indexOfFirstItem + index + 1}</TableCell>
-                      <TableCell>{itemsetData.itemset_name}</TableCell>
-                      <TableCell>{itemsetData.itemset_detail}</TableCell>
-                      <TableCell>{itemsetData.itemset_price}</TableCell>
-                      <TableCell>{itemsetData.itemset_qty}</TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={() => handleOpenEditDialog(itemsetData)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={() =>
-                            handleDeletePromotion(itemsetData.itemset_id)
-                          }
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {itemset
+                    .slice(indexOfFirstItem, indexOfFirstItem + rowsPerPage)
+                    .map((itemsetData, index) => (
+                      <TableRow key={itemsetData.itemset_id}>
+                        <TableCell>{indexOfFirstItem + index + 1}</TableCell>
+                        <TableCell>{itemsetData.itemset_name}</TableCell>
+                        <TableCell>{itemsetData.itemset_detail}</TableCell>
+                        <TableCell>{itemsetData.itemset_price}</TableCell>
+                        <TableCell>{itemsetData.itemset_qty}</TableCell>
+                        <TableCell>
+                          <IconButton
+                            onClick={() => handleOpenEditDialog(itemsetData)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </Paper>
@@ -231,7 +304,7 @@ export default function ItemsetManage() {
               }}
             >
               <Typography variant="caption" sx={{ marginRight: 2 }}>
-                Rows per page:
+                จำนวนแถวต่อหน้า:
               </Typography>
               <Select
                 value={rowsPerPage}
@@ -239,9 +312,9 @@ export default function ItemsetManage() {
                 variant="outlined"
                 sx={{ marginRight: 2 }}
               >
-                <MenuItem value={10}>10 rows</MenuItem>
-                <MenuItem value={20}>20 rows</MenuItem>
-                <MenuItem value={30}>30 rows</MenuItem>
+                <MenuItem value={10}>10 แถว</MenuItem>
+                <MenuItem value={20}>20 แถว</MenuItem>
+                <MenuItem value={30}>30 แถว</MenuItem>
               </Select>
 
               <Typography variant="caption" sx={{ marginRight: 2 }}>
@@ -255,17 +328,86 @@ export default function ItemsetManage() {
                 page={currentPage}
                 onChange={handleChangePage}
                 color="primary"
+                rowsPerPageOptions={[10, 20, 30]} // Optionally, provide the available rows per page options
+                rowsPerPage={rowsPerPage} // Pass the rowsPerPage state
               />
             </Box>
           </Container>
         </Box>
-      </Box>
-      <Pagination
-        count={Math.ceil(itemset.length / itemsPerPage)}
-        page={currentPage}
-        onChange={handlePageChange}
-        color="primary"
-      />
+      </Box>{" "}
+      {selectedItemSet && (
+        <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+          <DialogTitle>แก้ไขชุดสินค้า</DialogTitle>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              label="ชื่อชุดสินค้า"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={selectedItemSet ? selectedItemSet.itemset_name : ""}
+              onChange={(e) =>
+                setSelectedItemSet({
+                  ...selectedItemSet,
+                  itemset_name: e.target.value,
+                })
+              }
+            />
+            <TextField
+              margin="dense"
+              label="รายละเอียด"
+              type="text"
+              fullWidth
+              variant="outlined"
+              value={selectedItemSet ? selectedItemSet.itemset_detail : ""}
+              onChange={(e) =>
+                setSelectedItemSet({
+                  ...selectedItemSet,
+                  itemset_detail: e.target.value,
+                })
+              }
+            />
+            <TextField
+              margin="dense"
+              label="ราคาขายชุดสินค้า"
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={selectedItemSet ? selectedItemSet.itemset_price : ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value >= 0 || value === "") {
+                  setSelectedItemSet({
+                    ...selectedItemSet,
+                    itemset_price: value,
+                  });
+                }
+              }}
+            />
+            <TextField
+              margin="dense"
+              label="จำนวนชุดสินค้า"
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={selectedItemSet ? selectedItemSet.itemset_qty : ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value >= 0 || value === "") {
+                  setSelectedItemSet({
+                    ...selectedItemSet,
+                    itemset_qty: value,
+                  });
+                }
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setEditDialogOpen(false)}>ยกเลิก</Button>
+            <Button onClick={handleSaveChanges}>บันทึก</Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 }

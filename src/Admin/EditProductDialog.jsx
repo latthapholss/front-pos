@@ -334,7 +334,7 @@ function EditProductDialog({ open, onClose, product, onUpdate, selectedImageProp
             </TextField>
           </Grid>
           {/* Conditionally render additional fields based on the selected category */}
-          {(selectedCategory && (selectedCategory.name === 'กระจก' || selectedCategory.name === 'อลูมิเนียม')) ? (
+          {(selectedCategory && (selectedCategory.name === 'กระจก' || selectedCategory.name === 'อะลูมิเนียม')) ? (
             <>
               <Grid item xs={6}>
                 <TextField

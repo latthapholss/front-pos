@@ -337,31 +337,23 @@ export default function ItemsetPromotionadd() {
                     ),
                   }}
                 />
-                <TextField
-                  sx={{ mb: 2, gridColumn: "1 / span 2" }}
-                  label="จำนวนคู่สูงสุด"
-                  value={
-                    (parseInt(products1.quantity) +
-                      parseInt(products2.quantity)) /
-                    2
-                  }
-                  fullWidth
-                  margin="normal"
-                  disabled
-                />
+
                 <TextField
                   sx={{ mb: 2 }}
                   label="จำนวนชุดสินค้า (ไม่เกินจำนวนคู่สูงสุด)"
                   value={setQuantity}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
-                    const maxPairs =
-                      (parseInt(products1.quantity) +
-                        parseInt(products2.quantity)) /
-                      2;
-                    // ตรวจสอบว่าค่าที่กรอกเข้ามาไม่เกินจำนวนคู่สูงสุด
+                    const maxPairs = Math.min(
+                      Math.floor(parseInt(products1.quantity)),
+                      Math.floor(parseInt(products2.quantity))
+                    );
+                    // Check if the entered value is within the allowed range
                     if (value <= maxPairs) {
                       setSetQuantity(value);
+                    } else {
+                      // If entered value exceeds the maximum allowed, set it to the maximum
+                      setSetQuantity(maxPairs);
                     }
                   }}
                   fullWidth
@@ -388,7 +380,7 @@ export default function ItemsetPromotionadd() {
                   value={
                     discountCode
                       ? totalPrice -
-                        totalPrice * (parseFloat(discountCode) / 100)
+                      totalPrice * (parseFloat(discountCode) / 100)
                       : totalPrice
                   }
                   InputProps={{
@@ -405,9 +397,8 @@ export default function ItemsetPromotionadd() {
                           }}
                         >
                           {discountCode
-                            ? ` (ลด ${
-                                totalPrice * (parseFloat(discountCode) / 100)
-                              } บาท)`
+                            ? ` (ลด ${totalPrice * (parseFloat(discountCode) / 100)
+                            } บาท)`
                             : ` ${totalPrice} บาท`}
                         </Typography>
                         :
@@ -451,7 +442,7 @@ export default function ItemsetPromotionadd() {
                 />
                 {/* ลิงก์ย้อนกลับ */}
                 <Typography variant="body2" sx={{ textAlign: "center", mt: 1 }}>
-                  <Link component={RouterLink} to="/login" color="primary">
+                  <Link component={RouterLink} to="/promotion/promotionitemset" color="primary">
                     ย้อนกลับ
                   </Link>
                 </Typography>

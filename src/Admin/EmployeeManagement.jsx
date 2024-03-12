@@ -591,9 +591,9 @@ function EmployeeManagement({ person }) {
                             variant="outlined"
                             sx={{ marginRight: 2 }}
                           >
-                            <MenuItem value={10}>10 rows</MenuItem>
-                            <MenuItem value={20}>20 rows</MenuItem>
-                            <MenuItem value={30}>30 rows</MenuItem>
+                            <MenuItem value={10}>10 แถว</MenuItem>
+                            <MenuItem value={20}>20 แถว</MenuItem>
+                            <MenuItem value={30}>30 แถว</MenuItem>
                           </Select>
                           <Typography variant="caption" sx={{ marginRight: 2 }}>
                             {`${indexOfFirstItem + 1}–${Math.min(

@@ -300,38 +300,45 @@ function AdminProduct({ person }) {
 
 
 
-  const handleDeleteProduct = async (id) => {
+  const handleDeleteProduct = async (id, itemsetId) => {
     try {
-      const numericId = parseInt(id);
+        const numericId = parseInt(id);
 
-      const response = await post({ product_id: numericId, is_active: 0 }, ACTIVE_PRODUCT);
-      console.log('API Response:', response);
-      console.log('คือไร:', { product_id: numericId, is_active: 0 }, ACTIVE_PRODUCT);
+        const response = await post({ product_id: numericId, is_active: 0 }, ACTIVE_PRODUCT);
+        console.log('API Response:', response);
+        console.log('Payload:', { product_id: numericId, is_active: 0 });
 
-      if (response.success) {
-        // Display success message using SweetAlert
-        Swal.fire({
-          icon: 'success',
-          title: 'ลบสินค้า!',
-          text: 'ลบสินค้าเสร็จสิ้น.',
-        }).then((result) => {
-          // Reload products using handleGetProduct
-          if (result.isConfirmed || result.isDismissed) {
-            handleGetProduct();
-          }
-        });
-      } else {
-        // Handle unsuccessful deletion
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: 'Failed to delete the product. Please try again later.',
-        });
-      }
+        // Logging itemsetId before making deletion request
+        console.log('Item set ID:', itemsetId);
+
+        const responseitemset = await post({ product_id: numericId }, `/itemset/delete/${itemsetId}`);
+        console.log('Response for deleting item set:', responseitemset);
+
+        if (response.success) {
+            // Display success message using SweetAlert
+            Swal.fire({
+                icon: 'success',
+                title: 'ลบสินค้า!',
+                text: 'ลบสินค้าเสร็จสิ้น.',
+            }).then((result) => {
+                // Reload products using handleGetProduct
+                if (result.isConfirmed || result.isDismissed) {
+                    handleGetProduct();
+                }
+            });
+        } else {
+            // Handle unsuccessful deletion
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to delete the product. Please try again later.',
+            });
+        }
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }
-  };
+};
+
 
 
 
@@ -448,8 +455,10 @@ function AdminProduct({ person }) {
           unit: item.unit_id,
           image: getImagePath(item.product_image),
           is_active: item.is_active,
-          product_type_id: item.product_type_id
+          product_type_id: item.product_type_id,
+          itemset_id:item.itemset_id
         }));
+
         setProducts(modifiedData);
         setFilteredProducts(modifiedData);
       }
@@ -631,6 +640,8 @@ function AdminProduct({ person }) {
                             sx={{ backgroundColor: '#009ae1', height: '39px' }}
                             onClick={() => handleNavigateToLotPage(product.id)}
                             startIcon={<EditIcon />}
+                            disabled={product.itemset_id > 0} // เพิ่มการปิดใช้งานโดยตรงโดยใช้ disabled
+
                           >
                             จัดการล็อต
                           </Button>
@@ -641,7 +652,7 @@ function AdminProduct({ person }) {
                           </IconButton>
                         </TableCell>
                         <TableCell>
-                          <IconButton onClick={() => handleDeleteProduct(product.id)}>
+                        <IconButton onClick={() => handleDeleteProduct(product.id, product.itemset_id)}>
                             <DeleteIcon />
                           </IconButton>
                         </TableCell>
@@ -664,8 +675,8 @@ function AdminProduct({ person }) {
                           variant="outlined"
                           sx={{ marginRight: 2 }}
                         >
-                          <MenuItem value={8}>8 rows</MenuItem>
-                          <MenuItem value={16}>16 rows</MenuItem>
+                          <MenuItem value={8}>8 แถว</MenuItem>
+                          <MenuItem value={16}>16 แถว</MenuItem>
                           {/* Add more options as needed */}
                         </Select>
                         <Typography variant="caption" sx={{ marginRight: 2 }}>

@@ -111,13 +111,7 @@ export default function PromotionItemSet() {
                                 color: '#333335',
                                 fontWeight: 'bold'
                             }}>ชุดโปรโมชั่น</Typography>
-                            <Button
-                                sx={{ backgroundColor: '#28bc94', marginRight: '20px' }}
-                                variant="contained"
-                                onClick={() => navigate('/promotion/promotionitemset')}
-                            >
-                                จัดการชุดสินค้า
-                            </Button>
+                      
                         </Grid>
                         <Paper elevation={3} sx={{ width: '100%', borderRadius: 2, overflow: 'hidden' }}>
                             <Table sx={{ borderRadius: 5 }}>

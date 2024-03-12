@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -22,15 +22,27 @@ import {
   InputAdornment,
   Pagination,
   Select,
-  MenuItem
-} from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { DELETEPROMOTION, PROMOTION, PROMOTIONSTATUS, PROMOTION_ADD, UPDATE_PROMOTION, get, post } from '../Static/api';
-import Swal from 'sweetalert2';
-import axios from 'axios';
-import { useNavigate } from 'react-router';
-import { message } from 'antd';
-
+  MenuItem,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import {
+  DELETEPROMOTION,
+  PROMOTION,
+  PROMOTIONSTATUS,
+  PROMOTION_ADD,
+  UPDATE_PROMOTION,
+  get,
+  ip,
+  post,
+} from "../Static/api";
+import Swal from "sweetalert2";
+import axios from "axios";
+import { useNavigate } from "react-router";
+import { message } from "antd";
 
 function Promotionadd({ person }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,12 +54,12 @@ function Promotionadd({ person }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [promotionData, setPromotionData] = useState({
-    promotion_name: '',
-    promotion_detail: '',
-    discount: '',
-    promotion_start: '',
-    promotion_end: '',
-    quota: '',
+    promotion_name: "",
+    promotion_detail: "",
+    discount: "",
+    promotion_start: "",
+    promotion_end: "",
+    quota: "",
   });
   if (person && person.user_type === 0) {
     // Admin user
@@ -63,21 +75,14 @@ function Promotionadd({ person }) {
     setOpenDialog(true);
   };
 
-
   const NavigateItemset = () => {
-    navigate('/promotion/promotionitemset');
+    navigate("/promotion/promotionitemset");
   };
 
   useEffect(() => {
     handleGetPromotion();
     startAutoUpdatePromotionStatus();
-  },);
-
-
-  useEffect(() => {
-    // console.log("useEffect promotions:", promotions)
-    // console.log("useEffect currentItems:", currentItems)
-  }, [promotions, currentItems]);
+  }, []);
 
   //page
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -93,20 +98,21 @@ function Promotionadd({ person }) {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setPromotionData({
-      promotion_name: '',
-      promotion_detail: '',
-      discount: '',
-      promotion_start: '',
-      promotion_end: '',
-      quota: '',
+      promotion_name: "",
+      promotion_detail: "",
+      discount: "",
+      promotion_start: "",
+      promotion_end: "",
+      quota: "",
     });
   };
 
   const handleOpenEditDialog = (promotion) => {
     setSelectedPromotion(promotion);
     setEditDialogOpen(true);
-  };
 
+    // แปลงวันที่เริ่มต้นและสิ้นสุดเป็นรูปแบบที่ถูกต้องสำหรับ datetime-local
+  };
 
   const handleCloseEditDialog = () => {
     setSelectedPromotion(null);
@@ -127,7 +133,6 @@ function Promotionadd({ person }) {
     }));
   };
 
-
   const handleEditPromotion = async (editedPromotionData) => {
     try {
       const dataWithId = {
@@ -141,66 +146,65 @@ function Promotionadd({ person }) {
 
       const response = await post(
         dataWithId,
-        UPDATE_PROMOTION.replace(':promotion_id', editedPromotionData.id)
+        UPDATE_PROMOTION.replace(":promotion_id", editedPromotionData.id)
       );
 
-      console.log('Response from server:', response);
+      console.log("Response from server:", response);
 
       if (response.success) {
-        console.log('Promotion updated successfully:', response.message);
+        console.log("Promotion updated successfully:", response.message);
         handleGetPromotion();
 
         // เพิ่ม SweetAlert เมื่อแก้ไขสินค้าเสร็จสิ้น
         Swal.fire({
-          title: 'แก้ไขสำเร็จ!',
+          title: "แก้ไขสำเร็จ!",
           text: response.message,
-          icon: 'success',
-          confirmButtonText: 'ตกลง',
+          icon: "success",
+          confirmButtonText: "ตกลง",
         });
       } else {
-        console.error('Error updating promotion:', response.message);
+        console.error("Error updating promotion:", response.message);
       }
 
       handleCloseEditDialog();
     } catch (error) {
-      console.error('Error updating promotion:', error);
+      console.error("Error updating promotion:", error);
     }
   };
 
-
-
-
   const handleDeletePromotion = (promotionId) => {
     Swal.fire({
-      title: 'แน่ใจใช่ไหม?',
-      text: 'โปรโมชั่นจะถูกยกเลิก !',
-      icon: 'warning',
+      title: "แน่ใจใช่ไหม?",
+      text: "โปรโมชั่นจะถูกยกเลิก !",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'ตกลง',
-      cancelButtonText: 'ยกเลิก'
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
     }).then((result) => {
       if (result.isConfirmed) {
-        post({ promotion_id: promotionId, is_active: 0 }, DELETEPROMOTION).then((res) => {
-          if (res.success) {
-            const updatedPromotions = promotions.map((promotion) =>
-              promotion.id === promotionId ? { ...promotion, is_active: 0 } : promotion
-            );
-            setPromotions(updatedPromotions);
-            Swal.fire('ลบแล้ว!', 'โปรโมชั่นถูกยกเลิกแบบนุ่มแล้ว', 'success');
-            // เรียกฟังก์ชันดึงข้อมูลโปรโมชั่นใหม่หลังจากลบ
-            handleGetPromotion();
-          } else {
-            Swal.fire('ข้อผิดพลาด', res.message, 'error');
+        post({ promotion_id: promotionId, is_active: 0 }, DELETEPROMOTION).then(
+          (res) => {
+            if (res.success) {
+              const updatedPromotions = promotions.map((promotion) =>
+                promotion.id === promotionId
+                  ? { ...promotion, is_active: 0 }
+                  : promotion
+              );
+              setPromotions(updatedPromotions);
+              Swal.fire("ลบแล้ว!", "โปรโมชั่นถูกยกเลิกแบบนุ่มแล้ว", "success");
+              // เรียกฟังก์ชันดึงข้อมูลโปรโมชั่นใหม่หลังจากลบ
+              handleGetPromotion();
+            } else {
+              Swal.fire("ข้อผิดพลาด", res.message, "error");
+            }
           }
-        });
+        );
       }
     });
   };
 
   const handlePageChange = (event, newPage) => {
-
     setCurrentPage(newPage);
-
   };
 
   const handleSavePromotion = async () => {
@@ -209,23 +213,24 @@ function Promotionadd({ person }) {
         message.error("กรุณากรอกชื่อโปรโมชั่น");
         return;
       }
-  
+
       if (isNaN(promotionData.discount)) {
         message.error("กรุณากรอกค่า Discount ให้เป็นตัวเลข");
         return;
       }
-  
+
       if (!promotionData.promotion_start || !promotionData.promotion_end) {
         message.error("กรุณากรอกข้อมูลเริ่มต้นและสิ้นสุดโปรโมชั่น");
         return;
       }
-  
+
       if (isNaN(promotionData.quota)) {
         message.error("กรุณากรอกค่า Quota ให้เป็นตัวเลข");
         return;
       }
 
-      const detail = promotionData.promotion_detail || 'ไม่มีรายละเอียดโปรโมชั่น';
+      const detail =
+        promotionData.promotion_detail || "ไม่มีรายละเอียดโปรโมชั่น";
 
       const newData = {
         ...promotionData,
@@ -235,43 +240,38 @@ function Promotionadd({ person }) {
       const res = await post(newData, PROMOTION_ADD);
 
       if (res.success) {
-        console.log('Promotion added successfully:', res.message);
+        console.log("Promotion added successfully:", res.message);
 
         // เพิ่ม SweetAlert เมื่อเพิ่มโปรโมชั่นสำเร็จ
         Swal.fire({
-          title: 'เพิ่มโปรโมชั่นสำเร็จ!',
+          title: "เพิ่มโปรโมชั่นสำเร็จ!",
           text: res.message,
-          icon: 'success',
-          confirmButtonText: 'ตกลง',
+          icon: "success",
+          confirmButtonText: "ตกลง",
         });
 
         handleGetPromotion();
         startAutoUpdatePromotionStatus();
       } else {
-        console.error('Error adding promotion:', res.message);
+        console.error("Error adding promotion:", res.message);
       }
 
       handleCloseDialog();
 
-      console.log('Saved promotion data:', newData);
+      console.log("Saved promotion data:", newData);
     } catch (error) {
-      console.error('Error adding promotion:', error);
+      console.error("Error adding promotion:", error);
     }
   };
 
-
-
-
-
   const handleGetPromotion = async () => {
-
     try {
       // เรียก API เพื่อดึงข้อมูลโปรโมชั่น
       const res = await get(PROMOTION);
 
       if (res.success) {
         // กรองข้อมูลที่มี is_active เท่ากับ 1
-        const activePromotions = res.result //.filter(item => item.is_active === 1);
+        const activePromotions = res.result; //.filter(item => item.is_active === 1);
 
         // ประมวลผลข้อมูลที่ได้รับ
         const modifiedData = activePromotions.map((item) => ({
@@ -283,34 +283,47 @@ function Promotionadd({ person }) {
           discount: item.discount,
           quota: item.quota,
           selected: false,
-          is_active: item.is_active
+          is_active: item.is_active,
         }));
 
         setPromotions(modifiedData);
-        const _currentItems = modifiedData.slice(indexOfFirstItem, indexOfLastItem);
+        const _currentItems = modifiedData.slice(
+          indexOfFirstItem,
+          indexOfLastItem
+        );
         setCurrentItems(_currentItems);
         setLoading(false);
-
       }
     } catch (error) {
-      console.error('Error fetching promotions:', error);
+      console.error("Error fetching promotions:", error);
       setLoading(false);
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toISOString().slice(0, 16);
+    return formattedDate;
+  };
+  const startDateFormatted = selectedPromotion
+    ? formatDate(selectedPromotion.startDate)
+    : "";
+  const endDateFormatted = selectedPromotion
+    ? formatDate(selectedPromotion.endDate)
+    : "";
 
   const startAutoUpdatePromotionStatus = () => {
-    const interval = 600000; // 10 นาทีในมิลลิวินาที
+    const interval = 60000;
 
     // เรียกใช้ฟังก์ชัน updatePromotionStatus เพื่ออัปเดตสถานะโปรโมชั่น
     const autoUpdatePromotionStatus = async () => {
       try {
         await get(PROMOTIONSTATUS); // เรียกใช้งาน updatePromotionStatus โดยใส่วงเล็บ ()
-        console.log('Promotion statuses updated.');
+        console.log("Promotion statuses updated.");
       } catch (error) {
-        console.error('Error updating promotion statuses:', error);
+        console.error("Error updating promotion statuses:", error);
       }
-    }
+    };
 
     // เรียกฟังก์ชัน autoUpdatePromotionStatus ครั้งแรกเพื่อเริ่มการอัปเดตสถานะโปรโมชั่นโดยอัตโนมัติ
     autoUpdatePromotionStatus();
@@ -318,68 +331,80 @@ function Promotionadd({ person }) {
     // สร้าง interval เพื่อเรียกฟังก์ชัน autoUpdatePromotionStatus ในระหว่างที่ระบบทำงาน
     setInterval(() => {
       autoUpdatePromotionStatus();
-      console.log('Auto update triggered.');
+      console.log("Auto update triggered.");
     }, interval);
   };
-
-
-
 
   const handleSwitchChange = (promotion_id) => {
     // Create a copy of promotions to avoid directly mutating the state
     const updatedPromotions = [...promotions];
 
     // Find the index of the promotion to toggle
-    const promoIndex = updatedPromotions.findIndex((obj) => obj.id === promotion_id);
+    const promoIndex = updatedPromotions.findIndex(
+      (obj) => obj.id === promotion_id
+    );
 
-    // Toggle the is_active status
-    updatedPromotions[promoIndex].is_active = !updatedPromotions[promoIndex].is_active;
+    // Toggle the is_active status based on the current value
+    updatedPromotions[promoIndex].is_active =
+      updatedPromotions[promoIndex].is_active === 1 ? 0 : 1;
 
     // Update the state with the modified promotions
     setPromotions(updatedPromotions);
 
     // Update the currentItems if needed
-    const _currentItems = updatedPromotions.slice(indexOfFirstItem, indexOfLastItem);
+    const _currentItems = updatedPromotions.slice(
+      indexOfFirstItem,
+      indexOfLastItem
+    );
     setCurrentItems(_currentItems);
 
     // Make the API request to update the status on the server
     axios
-      .get(`http://localhost:4000/api/v1/promotion/switchactive/${promotion_id}`)
+      .get(`${ip}/promotion/switchactive/${promotion_id}`)
       .then((response) => {
         if (response.data.success) {
           // Handle the success response from the server if needed.
-          console.log('Promotion status updated on the server.');
+          console.log("Promotion status updated on the server.");
         } else {
           // Handle any error response from the server.
-          console.error('Error toggling promotion status on the server:', response.data.message);
+          console.error(
+            "Error toggling promotion status on the server:",
+            response.data.message
+          );
         }
       })
       .catch((error) => {
         // Handle network or other errors.
-        console.error('Error making server request:', error);
+        console.error("Error making server request:", error);
       });
   };
 
   return (
     <div>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography
           variant="h4"
           align="left"
           sx={{
-            color: '#333335',
-            marginTop: '20px',
-            fontSize: '24px', // Add this line for the border // Add some padding for space around the text
-            marginLeft: '20px',
-            height: '50px',
+            color: "#333335",
+            marginTop: "20px",
+            fontSize: "24px", // Add this line for the border // Add some padding for space around the text
+            marginLeft: "20px",
+            height: "50px",
             borderRadius: 2,
-            textAlign: 'center'
+            textAlign: "center",
           }}
         >
           จัดการโปรโมชั่น
-
         </Typography>
-        <Button sx={{ backgroundColor: '#28bc94', marginRight: '20px' }}
+        <Button
+          sx={{ backgroundColor: "#28bc94", marginRight: "20px" }}
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpenDialog}
@@ -387,47 +412,91 @@ function Promotionadd({ person }) {
           เพิ่มโปรโมชั่น
         </Button>
       </Box>
-      <Box sx={{ margin: '15px', backgroundColor: 'white', height: '1100px', borderRadius: 3, padding: '20px' }}>
-
+      <Box
+        sx={{
+          margin: "15px",
+          backgroundColor: "white",
+          height: "1100px",
+          borderRadius: 3,
+          padding: "20px",
+        }}
+      >
         <Box component="main">
           <Container maxWidth="xl">
-            <Grid container justifyContent="space-between" alignItems="center" mb={4}>
-              <Typography variant="h5" sx={{
-                fontSize: '20px',
-                borderBottom: '2px solid #009ae1',
-                paddingBottom: '5px',
-                color: '#333335',
-                fontWeight: 'bold'
-              }}>โปรโมชั่น</Typography>
-              <Button sx={{ backgroundColor: '#28bc94', marginRight: '20px' }}
+            <Grid
+              container
+              justifyContent="space-between"
+              alignItems="center"
+              mb={4}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  fontSize: "20px",
+                  borderBottom: "2px solid #009ae1",
+                  paddingBottom: "5px",
+                  color: "#333335",
+                  fontWeight: "bold",
+                }}
+              >
+                โปรโมชั่น
+              </Typography>
+              <Button
+                sx={{ backgroundColor: "#28bc94", marginRight: "20px" }}
                 variant="contained"
                 // startIcon={<AddIcon />}
                 onClick={NavigateItemset}
               >
-                ชุดสินค้า</Button>
+                ชุดสินค้า
+              </Button>
             </Grid>
 
-            <Paper elevation={3} sx={{ width: '100%', borderRadius: 2, overflow: 'hidden' }}>
+            <Paper
+              elevation={3}
+              sx={{ width: "100%", borderRadius: 2, overflow: "hidden" }}
+            >
               <Table sx={{ borderRadius: 5 }}>
-                <TableHead style={{
-                  backgroundColor: "#009ae1", color: 'white'
-                }}>
+                <TableHead
+                  style={{
+                    backgroundColor: "#009ae1",
+                    color: "white",
+                  }}
+                >
                   <TableRow>
-                    <TableCell style={{ color: 'white' }}>ลำดับชุดโปรโมชั่น</TableCell>
-                    <TableCell style={{ color: 'white' }}>ชื่อชุดโปรโมชั่น</TableCell>
-                    <TableCell style={{ color: 'white' }}>รายละเอียดสินค้า</TableCell>
-                    <TableCell style={{ color: 'white' }}>ราคาโปรโมชั่น</TableCell>
-                    <TableCell style={{ color: 'white' }}>วันที่เริ่มต้น</TableCell>
-                    <TableCell style={{ color: 'white' }}>วันที่หมดอายุ</TableCell>
-                    <TableCell style={{ color: 'white' }}>สถานะการใช้งาน</TableCell>
-                    <TableCell style={{ color: 'white' }}>จำนวนโปรโมชั่น (quota)</TableCell>
-                    <TableCell style={{ color: 'white' }}>แก้ไข</TableCell>
-                    <TableCell style={{ color: 'white' }}>ลบ</TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      ลำดับชุดโปรโมชั่น
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      ชื่อชุดโปรโมชั่น
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      รายละเอียดสินค้า
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      ราคาโปรโมชั่น
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      วันที่เริ่มต้น
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      วันที่หมดอายุ
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      สถานะการใช้งาน
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>
+                      จำนวนโปรโมชั่น (quota)
+                    </TableCell>
+                    <TableCell style={{ color: "white" }}>แก้ไข</TableCell>
+                    <TableCell style={{ color: "white" }}>ลบ</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {(rowsPerPage > 0
-                    ? promotions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+                    ? promotions.slice(
+                        (currentPage - 1) * rowsPerPage,
+                        currentPage * rowsPerPage
+                      )
                     : promotions
                   ).map((promotionData, index) => (
                     <TableRow key={promotionData.id}>
@@ -441,22 +510,31 @@ function Promotionadd({ person }) {
                       <TableCell>
                         {new Date(promotionData.endDate).toLocaleString()}
                       </TableCell>
-
                       <TableCell>
-                        <FormControlLabel control={<Switch checked={promotionData.is_active === 1} onChange={() => handleSwitchChange(promotionData.id)}
-                        />} />
-
-
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={promotionData.is_active === 1}
+                              onChange={() =>
+                                handleSwitchChange(promotionData.id)
+                              }
+                            />
+                          }
+                        />
                       </TableCell>
                       <TableCell>{promotionData.quota}</TableCell>
                       <TableCell>
-                        <IconButton onClick={() => handleOpenEditDialog(promotionData)}>
+                        <IconButton
+                          onClick={() => handleOpenEditDialog(promotionData)}
+                        >
                           <EditIcon />
                         </IconButton>
                       </TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={() => handleDeletePromotion(promotionData.id)}
+                          onClick={() =>
+                            handleDeletePromotion(promotionData.id)
+                          }
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -465,13 +543,23 @@ function Promotionadd({ person }) {
                   ))}
                 </TableBody>
               </Table>
-              <TableRow sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <TableRow
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                }}
+              >
                 <TableCell colSpan={10}>
                   <Box
-                    sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                    }}
                   >
                     <Typography variant="caption" sx={{ marginRight: 2 }}>
-                      Rows per page:
+                      จำนวนแถวต่อหน้า:
                     </Typography>
                     <Select
                       value={rowsPerPage}
@@ -479,12 +567,15 @@ function Promotionadd({ person }) {
                       variant="outlined"
                       sx={{ marginRight: 2 }}
                     >
-                      <MenuItem value={10}>10 rows</MenuItem>
-                      <MenuItem value={20}>20 rows</MenuItem>
-                      <MenuItem value={30}>30 rows</MenuItem>
+                      <MenuItem value={10}>10 แถว</MenuItem>
+                      <MenuItem value={20}>20 แถว</MenuItem>
+                      <MenuItem value={30}>30 แถว</MenuItem>
                     </Select>
                     <Typography variant="caption" sx={{ marginRight: 2 }}>
-                      {`${indexOfFirstItem + 1}–${Math.min(indexOfLastItem, promotions.length)} of ${promotions.length}`}
+                      {`${indexOfFirstItem + 1}–${Math.min(
+                        indexOfLastItem,
+                        promotions.length
+                      )} of ${promotions.length}`}
                     </Typography>
                     <Pagination
                       count={Math.ceil(promotions.length / rowsPerPage)}
@@ -497,9 +588,7 @@ function Promotionadd({ person }) {
               </TableRow>
             </Paper>
 
-            <Box
-              sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}
-            >
+            <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
               <Pagination
                 count={Math.ceil(promotions.length / itemsPerPage)}
                 page={currentPage}
@@ -533,11 +622,13 @@ function Promotionadd({ person }) {
                   value={promotionData.discount}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (parseFloat(value) >= 1 || value === '') {
+                    if (parseFloat(value) >= 1 || value === "") {
                       handleInputChange(e);
                     } else {
                       // Clear the value if it's less than 1
-                      handleInputChange({ target: { name: e.target.name, value: '' } });
+                      handleInputChange({
+                        target: { name: e.target.name, value: "" },
+                      });
                     }
                   }}
                   type="number"
@@ -550,45 +641,57 @@ function Promotionadd({ person }) {
 
                 <TextField
                   name="promotion_start"
-                  value={promotionData.promotion_start}
+                  value={promotionData.promotion_start.toLocaleString()}
                   onChange={handleInputChange}
                   type="datetime-local"
                   fullWidth
                   InputLabelProps={{
                     shrink: true,
-                    style: { position: 'relative', top: -12 }, // ปรับตำแหน่ง label
+                    style: { position: "relative", top: -12 }, // ปรับตำแหน่ง label
                   }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">วันที่เริ่มโปรโมชั่น</InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        วันที่เริ่มโปรโมชั่น
+                      </InputAdornment>
+                    ),
                   }}
                   margin="normal"
                 />
+
                 <TextField
                   name="promotion_end"
-                  value={promotionData.promotion_end}
+                  value={promotionData.promotion_end.toLocaleString()}
                   onChange={handleInputChange}
                   type="datetime-local"
                   fullWidth
                   InputLabelProps={{
                     shrink: true,
-                    style: { position: 'relative', top: -12 }, // ปรับตำแหน่ง label
+                    style: { position: "relative", top: -12 }, // ปรับตำแหน่ง label
                   }}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">วันสิ้นสุดโปรโมชั่น</InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        วันสิ้นสุดโปรโมชั่น
+                      </InputAdornment>
+                    ),
                   }}
                   margin="normal"
                 />
+
                 <TextField
                   label="จำนวนโปรโมชั่น (quota)"
                   name="quota"
                   value={promotionData.quota}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (parseFloat(value) >= 1 || value === '') {
+                    if (parseFloat(value) >= 1 || value === "") {
                       handleInputChange(e);
                     } else {
                       // Clear the value if it's less than 1
-                      handleInputChange({ target: { name: e.target.name, value: '' } });
+                      handleInputChange({
+                        target: { name: e.target.name, value: "" },
+                      });
                     }
                   }}
                   type="number"
@@ -619,7 +722,7 @@ function Promotionadd({ person }) {
             <TextField
               label="ชื่อโปรโมชั่น"
               name="promotionName"
-              value={selectedPromotion ? selectedPromotion.promotionName : ''}
+              value={selectedPromotion ? selectedPromotion.promotionName : ""}
               onChange={handleEditInputChange}
               fullWidth
               margin="normal"
@@ -638,11 +741,13 @@ function Promotionadd({ person }) {
               value={selectedPromotion.discount}
               onChange={(e) => {
                 const value = e.target.value;
-                if (parseFloat(value) >= 1 || value === '') {
+                if (parseFloat(value) >= 1 || value === "") {
                   handleEditInputChange(e);
                 } else {
                   // Clear the value if it's less than 1
-                  handleEditInputChange({ target: { name: e.target.name, value: '' } });
+                  handleEditInputChange({
+                    target: { name: e.target.name, value: "" },
+                  });
                 }
               }}
               type="number"
@@ -655,17 +760,19 @@ function Promotionadd({ person }) {
             <TextField
               label="วันที่เริ่มต้น"
               name="startDate"
-              value={selectedPromotion.startDate}
+              value={startDateFormatted}
               onChange={handleEditInputChange}
               type="datetime-local"
               fullWidth
               InputLabelProps={{
                 shrink: true,
-                style: { position: 'relative', top: -12 },
+                style: { position: "relative", top: -12 },
               }}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">วันที่เริ่มโปรโมชั่น</InputAdornment>
+                  <InputAdornment position="start">
+                    วันที่เริ่มโปรโมชั่น
+                  </InputAdornment>
                 ),
               }}
               margin="normal"
@@ -673,32 +780,37 @@ function Promotionadd({ person }) {
             <TextField
               label="วันที่หมดอายุ"
               name="endDate"
-              value={selectedPromotion.endDate}
+              value={endDateFormatted}
               onChange={handleEditInputChange}
               type="datetime-local"
               fullWidth
               InputLabelProps={{
                 shrink: true,
-                style: { position: 'relative', top: -12 },
+                style: { position: "relative", top: -12 },
               }}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">วันสิ้นสุดโปรโมชั่น</InputAdornment>
+                  <InputAdornment position="start">
+                    วันสิ้นสุดโปรโมชั่น
+                  </InputAdornment>
                 ),
               }}
               margin="normal"
             />
+
             <TextField
               label="จำนวนโปรโมชั่น (quota)"
               name="quota"
               value={selectedPromotion.quota}
               onChange={(e) => {
                 const value = e.target.value;
-                if (parseFloat(value) >= 1 || value === '') {
+                if (parseFloat(value) >= 1 || value === "") {
                   handleEditInputChange(e);
                 } else {
                   // Clear the value if it's less than 1
-                  handleEditInputChange({ target: { name: e.target.name, value: '' } });
+                  handleEditInputChange({
+                    target: { name: e.target.name, value: "" },
+                  });
                 }
               }}
               type="number"
@@ -713,17 +825,17 @@ function Promotionadd({ person }) {
             <Button onClick={handleCloseEditDialog} color="primary">
               ยกเลิก
             </Button>
-            <Button onClick={() => handleEditPromotion(selectedPromotion)} color="primary">
+            <Button
+              onClick={() => handleEditPromotion(selectedPromotion)}
+              color="primary"
+            >
               บันทึกการแก้ไข
             </Button>
           </DialogActions>
         </Dialog>
       )}
-
     </div>
-
   );
-
 }
 
 export default Promotionadd;

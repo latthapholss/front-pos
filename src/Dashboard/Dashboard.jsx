@@ -788,10 +788,10 @@ const Dashboard = () => {
                 <div className="dashboard-container"  >
                     <Card className="sales-card" style={{ backgroundColor: '#009ae1', color: 'white', borderRadius: '10px', boxShadow: '0px 0px 10px 0px rgba(0,0,0,0.2)' }}>
                         <CardContent>
-                            <Typography variant="h5">สมาชิก</Typography>
+                            <Typography variant="h5">ยอดขายวันนี้</Typography>
                             <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
                                 <AccountCircleIcon style={{ fontSize: '40px', marginRight: '10px' }} />
-                                <Typography variant="h4">{memberCount.toLocaleString()}</Typography>
+                                <Typography variant="h4">{dailySales.reduce((total, entry) => total + entry.totalSales, 0)}</Typography>
                             </div>
                         </CardContent>
                     </Card>
@@ -911,139 +911,24 @@ const Dashboard = () => {
                 </div>
             </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box
-                    sx={{
-                        margin: '15px',
-                        backgroundColor: 'white',
-                        borderRadius: 3,
-                        width: '750px', // Set the width to 100%
-                        height: '500px', // Set the height as needed
-                        overflow: 'auto',
-                        padding: '20px',
-                    }}
-                >
-                    <TableContainer component={Paper}>
-                        <Table aria-label="simple table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell colSpan={5} align="left" style={{ fontWeight: 'bold', fontSize: '20px' }}>
-                                        สินค้าขายดี
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell align="left"><strong>รหัสสินค้า</strong></TableCell>
-                                    <TableCell align="left">
-                                        <strong>
-                                            <TableSortLabel
-                                                active={sortConfig.field === 'Product_Name'}
-                                                direction={sortConfig.field === 'Product_Name' ? sortConfig.order : 'asc'}
-                                                onClick={() => handleSort2('Product_Name')}
-                                            >
-                                                ชื่อสินค้า
-                                            </TableSortLabel>
-                                        </strong>
-                                    </TableCell>
-                                    <TableCell align="left"><strong>ประเภทสินค้า</strong></TableCell>
-                                    <FormControl sx={{ m: 1, minWidth: 120 }}>
-
-                                        <InputLabel id="stock-filter-select-label">Stock Status</InputLabel>
-                                        <Select
-                                            labelId="stock-filter-select-label"
-                                            id="stock-filter-select"
-                                            value={stockFilter}
-                                            label="Stock Status"
-                                            onChange={handleStockFilterChange}
-                                        >
-                                            <MenuItem value="All">ทั้งหมด</MenuItem>
-                                            <MenuItem value="In Stock">สินค้าในคลัง</MenuItem>
-                                            <MenuItem value="Low Stock">ใกล้หมด</MenuItem>
-                                            <MenuItem value="Out of Stock">หมด</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                    <TableCell>
-                                    <strong>จำนวนออเดอร์ที่ขายได้</strong>
-            
-                                    </TableCell>
-
-                                    <TableCell align="left">
-                                        <strong>
-                                            <TableSortLabel
-                                                active={true}
-                                                direction={sortOrder}
-                                                onClick={handleSort}
-                                            >
-                                                ยอดขายทั้งหมด
-                                            </TableSortLabel>
-                                        </strong>
-                                    </TableCell>
-                                </TableRow>
-
-
-
-                            </TableHead>
-                            <TableBody>
-                                {filteredTopSellingProducts.map((row) => (
-                                    <TableRow key={row.Product_ID}>
-                                        <TableCell component="th" scope="row">
-                                            {row.sNo}
-                                        </TableCell>
-                                        <TableCell align="left">{row.Product_Name}</TableCell>
-                                        <TableCell align="left">
-                                            {clickedProductType === row.Product_Type ? (
-                                                <strong>{row.Product_Type}</strong>
-                                            ) : (
-                                                <span onClick={() => handleClickProductType(row.Product_Type)}>{row.Product_Type}</span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell
-                                            align="left"
-                                            style={{
-                                                fontWeight: 'bold',
-                                                color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
-                                                backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
-                                            }}
-                                        >
-                                            {row.Product_Lot_Quantity <= 0 ? 'หมด' : row.Product_Lot_Quantity}
-                                        </TableCell>
-
-                                        <TableCell
-                                            align="left"
-                                            style={{
-                                                // fontWeight: 'bold',
-                                                // color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
-                                                // backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
-                                            }}
-                                        >
-
-                                            {row.Stock}
-
-                                        </TableCell>
-
-                                        <TableCell align="left">{row.Total_Sales.toLocaleString()}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-
-                        </Table>
-                    </TableContainer>
-
-                </Box>
+      
+                
 
 
 
 
                 <Box
-                    sx={{
-                        margin: '15px',
-                        backgroundColor: 'white',
-                        borderRadius: 3,
-                        width: '800px',
-                        height: 'auto',
-                        float: 'right',
-                        padding: '25px',
-                        overflow: 'auto',
-                    }}
+                  sx={{
+                    margin: '15px',
+                    backgroundColor: 'white',
+                    borderRadius: 3,
+                    width: '1200px',
+                    height: 'auto',
+                    float: 'right',
+                    padding: '25px',
+                    overflow: 'auto',
+          
+                }}
                 >
                     <Grid container alignItems="center">
                         <Typography variant="h4" fontWeight="bold" fontSize="20px">
@@ -1146,7 +1031,124 @@ const Dashboard = () => {
 
                     {console.log('Chart rendered')}
                 </Box>
-            </Box>
+         
+            <Box
+                    sx={{
+                        margin: '15px',
+                        backgroundColor: 'white',
+                        borderRadius: 3,
+                        width: 'auto', // Set the width to 100%
+                        height: 'auto', // Set the height as needed
+                        overflow: 'auto',
+                        padding: '20px',
+                    }}
+                >
+                    <TableContainer component={Paper}>
+                        <Table aria-label="simple table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell colSpan={5} align="left" style={{ fontWeight: 'bold', fontSize: '20px' }}>
+                                        สินค้าขายดี
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell align="left"><strong>รหัสสินค้า</strong></TableCell>
+                                    <TableCell align="left">
+                                        <strong>
+                                            <TableSortLabel
+                                                active={sortConfig.field === 'Product_Name'}
+                                                direction={sortConfig.field === 'Product_Name' ? sortConfig.order : 'asc'}
+                                                onClick={() => handleSort2('Product_Name')}
+                                            >
+                                                ชื่อสินค้า
+                                            </TableSortLabel>
+                                        </strong>
+                                    </TableCell>
+                                    <TableCell align="left"><strong>ประเภทสินค้า</strong></TableCell>
+                                    <FormControl sx={{ m: 1, minWidth: 120 }}>
+
+                                        <InputLabel id="stock-filter-select-label">สถานะสินค้า</InputLabel>
+                                        <Select
+                                            labelId="stock-filter-select-label"
+                                            id="stock-filter-select"
+                                            value={stockFilter}
+                                            label="สถานะสินค้า"
+                                            onChange={handleStockFilterChange}
+                                        >
+                                            <MenuItem value="All">ทั้งหมด</MenuItem>
+                                            <MenuItem value="In Stock">สินค้าในคลัง</MenuItem>
+                                            <MenuItem value="Low Stock">ใกล้หมด</MenuItem>
+                                            <MenuItem value="Out of Stock">หมด</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                    <TableCell>
+                                    <strong>จำนวนออเดอร์ที่ขายได้</strong>
+            
+                                    </TableCell>
+
+                                    <TableCell align="left">
+                                        <strong>
+                                            <TableSortLabel
+                                                active={true}
+                                                direction={sortOrder}
+                                                onClick={handleSort}
+                                            >
+                                                ยอดขายทั้งหมด
+                                            </TableSortLabel>
+                                        </strong>
+                                    </TableCell>
+                                </TableRow>
+
+
+
+                            </TableHead>
+                            <TableBody>
+                                {filteredTopSellingProducts.map((row) => (
+                                    <TableRow key={row.Product_ID}>
+                                        <TableCell component="th" scope="row">
+                                            {row.sNo}
+                                        </TableCell>
+                                        <TableCell align="left">{row.Product_Name}</TableCell>
+                                        <TableCell align="left">
+                                            {clickedProductType === row.Product_Type ? (
+                                                <strong>{row.Product_Type}</strong>
+                                            ) : (
+                                                <span onClick={() => handleClickProductType(row.Product_Type)}>{row.Product_Type}</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell
+                                            align="left"
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
+                                                backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity <= 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
+                                            }}
+                                        >
+                                            {row.Product_Lot_Quantity <= 0 ? 'หมด' : row.Product_Lot_Quantity}
+                                        </TableCell>
+
+                                        <TableCell
+                                            align="left"
+                                            style={{
+                                                // fontWeight: 'bold',
+                                                // color: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFA500' : '#44C8A7') : '#E96E5B',
+                                                // backgroundColor: row.Product_Lot_Quantity > 0 ? (row.Product_Lot_Quantity < 50 ? '#FFF4E5' : '#E8F8F4') : '#FDEEEB',
+                                            }}
+                                        >
+
+                                            {row.Stock}
+
+                                        </TableCell>
+
+                                        <TableCell align="left">{row.Total_Sales.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+
+                        </Table>
+                    </TableContainer>
+
+                </Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
 
                 <Box sx={{

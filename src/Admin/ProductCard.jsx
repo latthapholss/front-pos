@@ -229,7 +229,7 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
               <Typography variant="body2" color="text.secondary">ความหนา: {product_thickness} มิลลิเมตร </Typography>
             </>
           )}
-          {category === "อลูมิเนียม" && (
+          {category === "อะลูมิเนียม" && (
             <>
               <Typography variant="body2" color="text.secondary">ความยาว: {product_length} นิ้ว</Typography>
               <Typography variant="body2" color="text.secondary">ความหนา: {product_thickness} มิลลิเมตร </Typography>
