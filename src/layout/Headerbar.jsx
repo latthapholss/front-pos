@@ -5,6 +5,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from "../context";
+import React from 'react';
 
 const HeaderBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);

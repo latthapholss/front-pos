@@ -111,7 +111,7 @@ export default function PromotionItemSet() {
                                 color: '#333335',
                                 fontWeight: 'bold'
                             }}>ชุดโปรโมชั่น</Typography>
-                      
+
                         </Grid>
                         <Paper elevation={3} sx={{ width: '100%', borderRadius: 2, overflow: 'hidden' }}>
                             <Table sx={{ borderRadius: 5 }}>
@@ -123,7 +123,7 @@ export default function PromotionItemSet() {
                                         <TableCell style={{ color: 'white' }}>รหัสสินค้า</TableCell>
                                         <TableCell style={{ color: 'white' }}>ชื่อสินค้า</TableCell> */}
                                         <TableCell style={{ color: 'white' }}>สร้างสินค้า</TableCell> {/* เพิ่มคอลัมน์สร้างสินค้า */}
-                                    <TableCell style={{ color: 'white' }}>confident</TableCell> */}
+                                        <TableCell style={{ color: 'white' }}>confident</TableCell>
 
                                     </TableRow>
                                 </TableHead>
@@ -136,7 +136,7 @@ export default function PromotionItemSet() {
                                                 <TableCell>{item.product_name1}</TableCell>
                                                 <TableCell>{`PID${String(item.product_id_2).padStart(6, '0')}`}</TableCell>
                                                 <TableCell>{item.product_name2}</TableCell> */}
-                                               
+
 
                                                 <TableCell>
                                                     {/* เพิ่มปุ่มสร้างสินค้า */}
@@ -148,9 +148,9 @@ export default function PromotionItemSet() {
                                                     >
                                                         สร้าง
                                                     </Button>
-                                            
+
                                                 </TableCell>
-                                                <TableCell>{item.confidence}</TableCell> 
+                                                <TableCell>{item.confidence}</TableCell>
                                             </TableRow>
                                         ))
                                     ) : (

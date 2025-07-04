@@ -68,6 +68,24 @@ export default function ReceiptDialog({ open, handleClose, orderId }) {
       });
     }
   };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 1:
+        return 'ขายสำเร็จ';
+      case 2:
+        return 'คืนสินค้า';
+      case 4:
+        return 'เติมสินค้าเข้าคลัง';
+      case 3:
+        return 'สินค้าชำรุด';
+      case 6:
+        return 'เคลมสินค้า'; // ข้อความสำหรับสถานะ claimed
+      default:
+        return 'ไม่ทราบสถานะ'; // หรือสถานะเริ่มต้นอื่นๆ ตามที่คุณต้องการ
+    }
+  };
+  
   
   
 
@@ -102,7 +120,7 @@ export default function ReceiptDialog({ open, handleClose, orderId }) {
           <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
             <div style={{ width: '150px' }}>
               <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
-              ร้านเมืองทองกระจกอะลูมิเนียม
+              ร้านเมืองทองกระจกอลูมิเนียม
 
               </Typography>
               <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
@@ -140,7 +158,13 @@ export default function ReceiptDialog({ open, handleClose, orderId }) {
             <TableBody>
               {receiptData.result.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell style={{ width: '40%' }}>{item.product_name}</TableCell>
+              <TableCell style={{ width: '40%' }}>
+        {item.product_name}
+        {/* เพิ่มสถานะต่อท้ายชื่อสินค้า */}
+        <span style={{ marginLeft: '10px', color: 'gray', fontStyle: 'italic' }}>
+          ({getStatusText(item.product_status)}) 
+        </span>
+      </TableCell>
                   <TableCell style={{ width: '10%' }}>{item.quantity}</TableCell>
                   <TableCell style={{ width: '10%' }}>{item.unit}</TableCell>
                   <TableCell style={{ width: '10%' }}>{item.unit_price}</TableCell>

@@ -30,6 +30,8 @@ export default function ItemsetPromotionadd() {
   const [itemsetname, setItemsetName] = useState("");
   const navigate = useNavigate();
   const [totalCost, setTotalCost] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [image, setImage] = useState('')
 
   useEffect(() => {
     handlegettwoproduct();
@@ -104,69 +106,64 @@ export default function ItemsetPromotionadd() {
   };
 
   const handleAddProductSet = () => {
-    const myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append(
-      "Cookie",
-      "connect.sid=s%3Akff5Isq6V9owpc0C5gMhC_i0DdNsDazP.90aRlzFd%2FTgwJKqQYTj55q%2FmGTAqPXaBeaD2eDyf1mw"
-    );
+    // Initialize FormData
+    const formData = new FormData();
 
-    const raw = JSON.stringify({
-      itemset_name: itemsetname,
-      itemset_detail: details,
-      itemset_price: discountCode
-        ? totalPrice - totalPrice * (parseFloat(discountCode) / 100)
-        : totalPrice,
-      itemset_qty: setQuantity,
-      itemset_product_1: products1.id,
-      itemset_product_2: products2.id,
-      itemset_cost: totalCost,
-    });
-    if (!itemsetname || !details || !setQuantity || !discountCode) {
-      // ถ้ามีข้อมูลไม่ครบ ให้แสดงข้อความเตือน
-      Swal.fire({
-        icon: "error",
-        title: "กรุณากรอกข้อมูล",
-        text: "กรุณากรอกข้อมูลให้ครบถ้วน",
-      });
-      return;
+    // Append text fields to formData
+    formData.append('itemset_name', itemsetname);
+    formData.append('itemset_detail', details);
+    formData.append('itemset_price', discountCode ? totalPrice - totalPrice * (parseFloat(discountCode) / 100) : totalPrice);
+    formData.append('itemset_qty', setQuantity);
+    formData.append('itemset_product_1', products1.id);
+    formData.append('itemset_product_2', products2.id);
+    formData.append('itemset_cost', totalCost);
+
+    // Append image file to formData if selected
+    if (selectedImage) {
+        formData.append('image_itemset', selectedImage);
     }
+
+    // Adjust requestOptions for FormData
     const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
+        method: 'POST',
+        body: formData, // Send formData as the request body
+        redirect: 'follow',
     };
-    fetch(ip + additemset, requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
+
+    // Remove Content-Type header, browser will set it with correct boundary
+    // Note: Do not manually set Content-Type header here, as the browser will automatically set
+    // it correctly, including the boundary parameter necessary for multipart/form-data.
+
+    fetch(`${ip}${additemset}`, requestOptions)
+    .then(response => response.json())
+    .then(result => {
         if (result.success) {
-          Swal.fire({
-            icon: "success",
-            title: "Success",
-            text: "Itemset added successfully!",
-          }).then(() => {
-            // หลังจากกด OK แล้ว กลับไปยังหน้า "/promotion/ItemsetManage"
-            navigate("/promotion/ItemsetManage");
-          });
+            Swal.fire({
+                icon: "success",
+                title: "Success",
+                text: "Itemset added successfully!",
+            }).then(() => {
+                // Redirect or handle success
+                navigate("/promotion/ItemsetManage");
+            });
         } else {
-          // กรณีมีข้อผิดพลาดจากการเพิ่มชุดสินค้า
-          Swal.fire({
-            icon: "error",
-            title: "Failed",
-            text: `Failed to add itemset: ${result.message}`,
-          });
+            // Handle failure
+            Swal.fire({
+                icon: "error",
+                title: "Failed",
+                text: `Failed to add itemset: ${result.message}`,
+            });
         }
-      })
-      .catch((error) => {
+    })
+    .catch(error => {
         console.error("Error adding itemset:", error);
         Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "An error occurred while adding itemset.",
+            icon: "error",
+            title: "Error",
+            text: "An error occurred while adding itemset.",
         });
-      });
-  };
+    });
+};
 
   const handleDiscountCodeChange = (e) => {
     const value = e.target.value;
@@ -175,6 +172,13 @@ export default function ItemsetPromotionadd() {
       setDiscountCode(value);
       setDiscountCodeCost(value);
     }
+  };
+  const handleImageUpload = (event) => {
+    const imageFile = event.target.files[0];
+    console.log('dvdvdvdv'+imageFile)
+
+    setSelectedImage(imageFile);
+console.log('dvdvdvdv'+imageFile)
   };
 
   const handleDetailsChange = (event) => {
@@ -236,6 +240,55 @@ export default function ItemsetPromotionadd() {
                 เพิ่มชุดสินค้า
               </Typography>
             </Grid>
+            <Box mt={2} display="flex" flexDirection="column" alignItems="center" mb={2}>
+          {/* Product Image */}
+          <div>
+            {selectedImage ? (
+              <div>
+                <img
+                  src={URL.createObjectURL(selectedImage)}
+                  alt="Product Image"
+                  style={{ maxWidth: '100%', maxHeight: '300px' }}
+                />
+              </div>
+            ) : (
+              <Box
+                width="300px"
+                height="300px"
+                border="1px dashed gray"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <label htmlFor="image-upload" style={{ cursor: 'pointer' }}>
+                  <input
+                    accept="image/*"
+                    id="image-upload"
+                    type="file"
+                    style={{ display: 'none' }}
+                    onChange={handleImageUpload}
+                  />
+                  <Button variant="contained" color="primary" component="span">
+                    {image ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ'}
+                  </Button>
+                </label>
+              </Box>
+            )}
+          </div>
+          {/* Delete Image Button */}
+          {selectedImage && (
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setSelectedImage(null)}
+              style={{ marginTop: '8px' }}
+            >
+              ลบรูปภาพ
+            </Button>
+
+          )}
+        </Box>
+
             <Container style={{ display: "flex", justifyContent: "center" }}>
               <Box
                 sx={{

@@ -9,11 +9,14 @@ import {
   TableHead,
   TableBody,
   TableRow,
-  TableCell, MenuItem, Select
+  TableCell,
+  MenuItem,
+  Select
 } from '@mui/material';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import { getReceiptData, getReceiptRefundData, ip } from '../../Static/api';
+import html2canvas from 'html2canvas';
 
 function ReceiptRefundDialog({ open, handleClose, orderId }) {
   const [receiptData, setReceiptData] = useState(null);
@@ -21,6 +24,21 @@ function ReceiptRefundDialog({ open, handleClose, orderId }) {
   const [loading, setLoading] = useState(false);
 
   const contentRef = useRef(null);
+  const [triggerPdfGeneration, setTriggerPdfGeneration] = useState(false);
+  const handleDateChange = (event) => {
+    setSelectedDate(event.target.value);
+    // Reset the trigger to avoid generating the PDF immediately after setting the date
+    setTriggerPdfGeneration(false);
+  };
+  const preparePdfGeneration = () => {
+    setTriggerPdfGeneration(true);
+  };
+  useEffect(() => {
+    if (triggerPdfGeneration) {
+      generatePdf();
+      setTriggerPdfGeneration(false); // Reset the trigger after generating the PDF
+    }
+  }, [triggerPdfGeneration]); // Make sure to include all dependencies used inside generatePdf
 
   useEffect(() => {
     const fetchReceiptData = async () => {
@@ -54,19 +72,38 @@ function ReceiptRefundDialog({ open, handleClose, orderId }) {
     }
   }, [open, orderId]);
 
-  const handleSaveAsPDF = () => {
-    const pdf = new jsPDF();
-    const content = contentRef.current;
-
-    if (content) {
-      pdf.html(content, {
-        callback: function (pdf) {
-          pdf.save('receipt.pdf');
-        },
-        margin: [15, 15],
-      });
+  const generatePdf = () => {
+    if (!contentRef.current) {
+      console.error("The content reference is not available.");
+      return;
     }
+
+    // Using html2canvas to take a snapshot of the current ref content
+    html2canvas(contentRef.current, { scale: 2 }) // Adjust scale as needed for higher quality
+      .then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: "landscape",
+          unit: "mm",
+          format: "a4"
+        });
+
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        // Calculate the height based on the aspect ratio of the image
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+        // Add the image to the PDF and set it to fit the page
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        // Save the generated PDF
+        pdf.save('receiptRefund.pdf');
+      })
+      .catch(error => {
+        // Proper error handling
+        console.error("Error generating PDF: ", error);
+      });
   };
+
 
   const handlePrint = () => {
     window.print();
@@ -83,16 +120,15 @@ function ReceiptRefundDialog({ open, handleClose, orderId }) {
     return paddedOrderId;
   };
 
-  const formatDateTime = (dateTimeString) => {
+  const formatDateTime = () => {
+    const now = new Date();
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-    const formattedDateTime = new Date(dateTimeString).toLocaleDateString('th-TH', options);
+    const formattedDateTime = now.toLocaleDateString('th-TH', options);
     return formattedDateTime;
   };
   const [selectedDate, setSelectedDate] = useState('');
 
-  const handleDateChange = (event) => {
-    setSelectedDate(event.target.value);
-  };
+
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
@@ -101,139 +137,159 @@ function ReceiptRefundDialog({ open, handleClose, orderId }) {
           <Typography variant="h3" sx={{ fontSize: 28 }}>ใบเสร็จคืนสินค้า</Typography>
 
           <div>
-            {/* <Button onClick={handleSaveAsPDF}>บันทึกเป็น PDF</Button>
-            <Button onClick={handlePrint}>พิมพ์</Button>
-            <Button onClick={handleClose}>ปิด</Button> */}
+            <Button onClick={preparePdfGeneration} variant="outlined" sx={{ mr: 1 }}>บันทึกเป็น PDF</Button>
+            <Button onClick={handlePrint} variant="outlined" sx={{ mr: 1 }}>พิมพ์</Button>
+            <Button onClick={handleClose} variant="outlined" sx={{ mr: 1 }}>ปิด</Button>
           </div>
         </div>
       </DialogTitle>
-      <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
+      <DialogContent ref={contentRef} style={{ padding: '100px' }}>
+        {/* Your receipt content */}
+        {/* Ensure that receiptData is available before rendering */}
         {receiptData && (
-          <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
-            <div style={{ width: '150px' }}>
-              <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
-                ร้านเมืองทองกระจกอะลูมิเนียม
-              </Typography>
-              <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
-                เลขที่ใบเสร็จ: {formatOrderId(receiptData.result[0].order_id)}
-              </Typography>
-              <Typography variant="body1">
-                ชื่อลูกค้า: {receiptData.result[0].member_fname} {receiptData.result[0].member_lname}
-              </Typography>
-              <Typography variant="body2" style={{ whiteSpace: 'nowrap' }}>
-                ที่อยู่: 47 หมู่ 14 ต.เจาทอง อ.ภักดีชุมพล จ.ชัยภูมิ 36260
-              </Typography>
-            </div>
-
-            <div style={{ width: '150px' }}>
-              <Typography variant="body2">
-                วันที่: {selectedDate ? formatDateTime(selectedDate) : 'N/A'}
-              </Typography>
-            </div>
-
-          </div>
-        )}
-        {receiptData && receiptData.result && receiptData.result.length > 0 ? (
           <>
-            <Select
-              value={selectedDate}
-              onChange={handleDateChange}
-              style={{ width: '100%' }}
-              displayEmpty
-              inputProps={{ 'aria-label': 'Select Date' }}
-            >
-              <MenuItem value="" disabled>
-                เลือกวันเวลาที่คืน
-              </MenuItem>
-              {receiptData.result.map((item, index) => (
-                <MenuItem key={index} value={item.order_product_date}>
-                  {formatDateTime(item.order_product_date)}
-                </MenuItem>
-              ))}
-            </Select>
-            <Table style={{ width: '100%' }}>
-              <TableHead>
-                <TableRow>
-                  <TableCell style={{ width: '40%' }}>สินค้า</TableCell>
-                  <TableCell style={{ width: '10%' }}>จำนวน</TableCell>
-                  <TableCell style={{ width: '10%' }}>หน่วยนับ</TableCell>
-                  <TableCell style={{ width: '10%' }}>ราคาต่อหน่วย</TableCell>
-                  <TableCell style={{ width: '10%' }}>รวมเงิน</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {receiptData.result.map((item, index) => (
-                  item.order_product_date === selectedDate && (
-                    <TableRow key={index}>
-                      <TableCell style={{ width: '40%' }}>{item.product_name}</TableCell>
-                      <TableCell style={{ width: '10%' }}>{item.quantity}</TableCell>
-                      <TableCell style={{ width: '10%' }}>{item.unit}</TableCell>
-                      <TableCell style={{ width: '10%' }}>{item.unit_price}</TableCell>
-                      <TableCell style={{ width: '10%' }}>{item.unit_price * item.quantity}</TableCell>
+            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ width: '50%' }}>
+                <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
+                  ร้านเมืองทองกระจกอลูมิเนียม
+                </Typography>
+                <Typography variant="body3" style={{ whiteSpace: 'nowrap' }}>
+                  เลขที่ใบเสร็จ: {formatOrderId(receiptData.result[0].order_id)}
+                </Typography>
+                <Typography variant="body1">
+                  ชื่อลูกค้า: {receiptData.result[0].member_fname} {receiptData.result[0].member_lname}
+                </Typography>
+                <Typography variant="body2" style={{ whiteSpace: 'nowrap' }}>
+                  ที่อยู่: 47 หมู่ 14 ต.เจาทอง อ.ภักดีชุมพล จ.ชัยภูมิ 36260
+                </Typography>
+              </div>
+              <div style={{ width: '50%' }}>
+                <Typography variant="body2">
+                  วันที่: {formatDateTime()}
+                </Typography>
+              </div>
+            </div>
+            {receiptData.result && receiptData.result.length > 0 ? (
+              <>
+                <Table style={{ width: '100%', marginTop: '20px' }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell style={{ width: '40%' }}>สินค้า</TableCell>
+                      <TableCell style={{ width: '10%' }}>จำนวน</TableCell>
+                      <TableCell style={{ width: '10%' }}>หน่วยนับ</TableCell>
+                      <TableCell style={{ width: '10%' }}>ราคาต่อหน่วย</TableCell>
+                      <TableCell style={{ width: '10%' }}>รวมเงิน</TableCell>
                     </TableRow>
-                  )
-                ))}
-              </TableBody>
-            </Table>
+                  </TableHead>
+                  <TableBody>
+                    {receiptData.result.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell style={{ width: '40%' }}>{item.product_name}</TableCell>
+                        <TableCell style={{ width: '10%' }}>{item.quantity}</TableCell>
+                        <TableCell style={{ width: '10%' }}>{item.unit}</TableCell>
+                        <TableCell style={{ width: '10%' }}>{item.unit_price}</TableCell>
+                        <TableCell style={{ width: '10%' }}>{item.unit_price * item.quantity}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
+            ) : (
+              <p>ไม่มีการคืนสินค้า</p>
+            )}
+            {/* Additional Footer Section */}
+            {receiptData.result && receiptData.result.length > 0 && (
+              <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ width: '50%' }}>
+                  {/* <Typography variant="body2">แต้ม: {receiptData.result[0].point}</Typography> */}
+                </div>
+                <div style={{ width: '50%', textAlign: 'right' }}>
+                  <Typography variant="body1">
+                    จำนวนเงินที่คืน : {' '}
+                    <span style={{ color: 'red' }}>
+                      {receiptData.result[0].total_amount}
+                    </span>
+                  </Typography>
+                </div>
+              </div>
+            )}
+            {receiptData && (
+              <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '50px' }}>
+                <div style={{ width: '50%', textAlign: 'right' }}>
+                  <Typography variant="body2">ผู้รับ:____________________</Typography>
+                </div>
+                <div style={{ width: '50%', textAlign: 'right', marginLeft: 'auto' }}>
+                  <Typography variant="body2">ลูกค้า:____________________</Typography>
+                </div>
+              </div>
+            )}
           </>
-        ) : (
-          <p>ไม่มีการคืนสินค้า</p>
-        )}
-        {/* Additional Footer Section */}
-        {receiptData && receiptData.result && receiptData.result.length > 0 && (
-
-          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
-            <div style={{ width: '50%' }}>
-              {/* <Typography variant="body2">แต้ม: {receiptData.result[0].point}</Typography> */}
-            </div>
-
-            <div style={{ width: '50%', textAlign: 'right' }}>
-              <Typography variant="body1">
-                จำนวนเงินที่คืน : {' '}
-                <span style={{ color: 'red' }}>
-                  {receiptData.result[0].total_amount}
-                </span>
-              </Typography>
-            </div>
-          </div>
-        )}
-
-        {receiptData && (
-          <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', marginTop: '50px' }}>
-            <div style={{ width: '50%', textAlign: 'right' }}>
-              <Typography variant="body2">ผู้รับ:____________________</Typography>
-            </div>
-            <div style={{ width: '50%', textAlign: 'right', marginLeft: 'auto' }}>
-              <Typography variant="body2">ลูกค้า:____________________</Typography>
-            </div>
-          </div>
         )}
       </DialogContent>
 
       <style>
         {`
-  @media print {
-    /* Hide buttons in the dialog title when printing */
-    .MuiDialogTitle-root button {
-      display: none;
-    }
+          @media print {
+            /* Hide buttons in the dialog title when printing */
+            .MuiDialogTitle-root button {
+              display: none;
+            }
 
-    /* Ensure that table borders are visible when printing */
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
+            /* Ensure that table borders are visible when printing */
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-  }
-  body {
-    font-family: 'Sarabun', sans-serif;
-  }
-`}
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+          }
+          body {
+            font-family: 'Sarabun', sans-serif;
+          }
+
+          /* Additional CSS styles for the PDF */
+          .MuiDialogContent-root {
+            padding: 20px;
+          }
+          .MuiTypography-root {
+            margin-bottom: 10px;
+          }
+          .MuiTable-root {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          .MuiTableHead-root,
+          .MuiTableBody-root {
+            border: 1px solid #ddd;
+          }
+          .MuiTableCell-root {
+            padding: 8px;
+            text-align: left;
+          }
+          .MuiTableRow-root {
+            border: 1px solid #ddd;
+          }
+
+          /* Additional styling for better appearance */
+          .MuiDialogTitle-root {
+            padding: 20px;
+            background-color: #f0f0f0;
+          }
+          .MuiDialogTitle-root > div {
+            margin-bottom: 20px;
+          }
+          .MuiDialogContent-root {
+            background-color: #fafafa;
+            border-radius: 10px;
+          }
+          .MuiButton-root {
+            margin-right: 10px;
+          }
+        `}
       </style>
     </Dialog>
   );

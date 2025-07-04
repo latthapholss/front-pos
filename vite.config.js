@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
   server: {
-    host: '10.199.7.12' 
-  }
-})
+    host: '0.0.0.0', // หรือ 'localhost' หรือไม่ใส่ host ก็ได้
+    port: 5173,
+  },
+});

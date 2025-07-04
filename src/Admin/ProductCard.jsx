@@ -124,6 +124,7 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
         <Typography variant="h6" component="div" sx={{ fontSize: '1.2rem', fontWeight: 'bold', mb: 1 }}>
           {name}
         </Typography>
+        
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem', mb: 0.5 }}>
           ราคา: {selectedPrice} THB
         </Typography>
@@ -224,7 +225,7 @@ const ProductCard = ({ id, name, price, image, onSelect, product_qty, product_co
           <Typography variant="body2" color="text.secondary">รายละเอียดสินค้า: {product_detail}</Typography>
           {category === "กระจก" && (
             <>
-              <Typography variant="body2" color="text.secondary">ความสูง: {product_width} นิ้ว</Typography>
+              <Typography variant="body2" color="text.secondary">ความกว้าง: {product_width} นิ้ว</Typography>
               <Typography variant="body2" color="text.secondary">ความยาว: {product_length} นิ้ว</Typography>
               <Typography variant="body2" color="text.secondary">ความหนา: {product_thickness} มิลลิเมตร </Typography>
             </>

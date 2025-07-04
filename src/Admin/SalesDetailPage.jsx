@@ -19,6 +19,7 @@ import {
   CRefund,
   GETORDERDETAIL,
   PROMOTIONSTATUS,
+  claimproduct,
   get,
   getorderproduct,
   ip,
@@ -54,6 +55,8 @@ function SalesDetailPage({ person }) {
   const [ORDERS, setORDERS] = useState([]);
   const [viewRefundProductsDialogOpen, setViewRefundProductsDialogOpen] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState({});
+  const [refundNote, setRefundNote] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState(null);
 
 
   useEffect(() => {
@@ -149,18 +152,25 @@ function SalesDetailPage({ person }) {
       setSnackbarOpen(true);
     }
   };
-  const handleRemoveproduct = async (opid, order_id) => {
+  const handleRemoveproduct = async (opid, order_id, note) => {
     try {
-      // แสดงค่า opid และ order_id ที่จะส่งไปใน API ใน console.log
-      console.log("Sending data to API:", { opid, order_id });
+      // Check if note is not just whitespace (without using trim())
+      if (!note || note.match(/^ *$/) !== null) {
+        // If note is empty or only whitespace, set an error message and return early
+        setSnackbarSeverity("error");
+        setSnackbarMessage("กรุณากรอกหมายเหตุ");
+        setSnackbarOpen(true);
+        return; // Exit the function early
+      }
+
+      console.log("Sending data to API:", { opid, order_id, note });
 
       const result = await fetch(`${ip}${removeproduct}`, {
-        // ใช้ `${ip}${refundproduct}` เพื่อรวม URL
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ opid }), // ส่ง opid และ order_id ไปยัง API
+        body: JSON.stringify({ opid, note }),
       });
 
       if (!result.ok) {
@@ -176,10 +186,9 @@ function SalesDetailPage({ person }) {
         setSnackbarOpen(true);
 
         handleviewRefundProducts(order_id);
-        setViewRefundProductsDialogOpen(false)
+        setViewRefundProductsDialogOpen(false);
         handleGetORDER(order_id);
       } else {
-
         setSnackbarSeverity("error");
         setSnackbarMessage(data.message || "Unexpected error");
         setSnackbarOpen(true);
@@ -190,6 +199,7 @@ function SalesDetailPage({ person }) {
       setSnackbarOpen(true);
     }
   };
+
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
   };
@@ -378,7 +388,7 @@ function SalesDetailPage({ person }) {
       }
       const data = await response.json();
 
-      const successProducts = data.result.filter(product => product.status === "refund");
+      const successProducts = data.result.filter(product => product.status_id === 2);
 
       console.log('ข้อมูล', successProducts)
       setSelectedRefund(successProducts);
@@ -390,6 +400,51 @@ function SalesDetailPage({ person }) {
       console.error("Error fetching order products:", error);
     }
   };
+
+  const handleClaimProduct = async (opid, order_id) => {
+    console.log("Claiming product", { opid, order_id });
+    try {
+      const response = await fetch(`${ip}${claimproduct}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ opid }), // Assuming the API needs only opid to process the claim
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text(); // Get the error text if the response is not OK
+        throw new Error(errorText || "Unexpected error");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSnackbarSeverity("success");
+        setSnackbarMessage("เคลมสินค้าเรียบร้อย");
+        setSnackbarOpen(true);
+
+        // Optionally refresh data or perform additional actions
+        handleViewOrderProducts(order_id); // Reload order products
+        handleGetORDER(order_id); // Reload the order list
+      } else {
+        setSnackbarSeverity("error");
+        setSnackbarMessage(data.message || "Unexpected error");
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error claiming product:", error);
+      setSnackbarSeverity("error");
+      setSnackbarMessage(error.message || "Unexpected error");
+      setSnackbarOpen(true);
+    }
+  };
+
+
+  const [note, setnote] = useState({
+    textnote: '',
+});
+
 
 
   return (
@@ -508,7 +563,6 @@ function SalesDetailPage({ person }) {
                     <TableRow key={item.order_id}>
                       <TableCell>{item.order_id}</TableCell>
                       <TableCell>{item.order_date}</TableCell>
-
                       <TableCell>{item.total_quantity}</TableCell>
                       <TableCell>{item.total_amount} บาท</TableCell>
 
@@ -521,7 +575,6 @@ function SalesDetailPage({ person }) {
                           รายการสินค้า
                         </Button>
                       </TableCell>
-
                       <TableCell>
                         <Button
                           onClick={() => handleViewReceipt(item.order_id)}
@@ -532,23 +585,22 @@ function SalesDetailPage({ person }) {
                         </Button>
                       </TableCell>
                       <TableCell>
-                        {item.order_products.some((product) => product.op_status === "refund") && (
+                        {item.order_products.some((product) => product.op_status === 2) && (
                           <Button
                             onClick={() => handleViewReceiptRefund(item.order_id)}
                             variant="contained"
                             style={{
                               backgroundColor: "#795548",
                               color: "white",
-                              marginRight: "8px", // Add some spacing between buttons
+                              marginRight: "8px",
                             }}
                           >
                             ใบเสร็จคืนสินค้า
                           </Button>
-
                         )}
                       </TableCell>
                       <TableCell>
-                        {item.order_products.some((product) => product.op_status === "refund") && (
+                        {item.order_products.some((product) => product.op_status === 2) && (
                           <Button
                             onClick={() => handleViewOrderRefundProducts(item.order_id)}
                             variant="contained"
@@ -634,6 +686,7 @@ function SalesDetailPage({ person }) {
                     )}
                   </TableCell>
                   <TableCell style={{ color: "white" }}>คืนสินค้า</TableCell>
+                  <TableCell style={{ color: "white" }}>เคลมสินค้า</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -646,45 +699,52 @@ function SalesDetailPage({ person }) {
                     <TableCell
                       style={{
                         color:
-                          product.status === "success"
+                          product.status_id === 1
                             ? "#44C8A7"
-                            : product.status === "refund"
+                            : product.status_id === 2
                               ? "#ffbb00"
-                              : product.status === "Confirmrefund"
+                              : product.status_id === 4
                                 ? "#1a237e"
-                                : product.status === "RemoveProduct"
+                                : product.status_id === 3
                                   ? "#d01716"
-                                  : "white",
+                                  : product.status_id === 6
+                                    ? "#007bff"
+                                    : "white",
                         border: "1px solid #e0e0e0",
                         padding: "8px",
                         backgroundColor:
-                          product.status === "success"
+                          product.status_id === 1
                             ? "#E8F8F4"
-                            : product.status === "refund"
+                            : product.status_id === 2
                               ? "#fff3d1"
-                              : product.status === "Confirmrefund"
+                              : product.status_id === 4
                                 ? "#e8eaf6"
-                                : product.status === "RemoveProduct"
+                                : product.status_id === 3
                                   ? "#f8d7da"
-                                  : "white",
+                                  : product.status_id === 6
+                                    ? "#cce5ff"
+                                    : "white",
                         borderRadius: "5px",
                         textAlign: "center",
                         fontWeight: "bold",
                       }}
                     >
-                      {product.status === "success"
+                      {product.status_id === 1
                         ? "ขายสินค้าสำเร็จ"
-                        : product.status === "refund"
+                        : product.status_id === 2
                           ? "คืนสินค้า"
-                          : product.status === "Confirmrefund"
+                          : product.status_id === 4
                             ? "เติมสินค้าเข้าคลัง"
-                            : product.status === "RemoveProduct"
-                              ? "สินค้ามีชำรุด:นำสินค้าออก"
-                              : product.status}
+                            : product.status_id === 3
+                              ? `สินค้ามีชำรุด: ${product.refund_note}`
+                              : product.status_id === 6
+                                ? "สินค้าถูกเคลม"
+                                : product.status_id}
                     </TableCell>
 
+
                     <TableCell>
-                      {product.status === "success" && (
+                      {product.status_id === 1  && (
                         <Button
                           onClick={() =>
                             handleReturnProduct(product.opid, product.order_id)
@@ -693,6 +753,17 @@ function SalesDetailPage({ person }) {
                           color="primary"
                         >
                           คืนสินค้า
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {product.status_id === 3 && (
+                        <Button
+                          onClick={() => handleClaimProduct(product.opid, product.order_id)}
+                          variant="contained"
+                          style={{ backgroundColor: '#f50057', color: 'white' }}
+                        >
+                          เคลมสินค้า
                         </Button>
                       )}
                     </TableCell>
@@ -710,7 +781,7 @@ function SalesDetailPage({ person }) {
       <Dialog
         open={viewRefundProductsDialogOpen}
         onClose={() => setViewRefundProductsDialogOpen(false)}
-        maxWidth="md"
+        maxWidth="xl"
         fullWidth
       >
         <DialogTitle>ยืนยันการคืนสินค้า</DialogTitle>
@@ -732,6 +803,7 @@ function SalesDetailPage({ person }) {
                   </TableCell>
                   <TableCell style={{ color: "white" }}>คืนสินค้า</TableCell>
                   <TableCell style={{ color: "white" }}>ลบสินค้า</TableCell>
+                  <TableCell style={{ color: "white", minWidth: "200px" }}>หมายเหตุ</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -744,13 +816,13 @@ function SalesDetailPage({ person }) {
                     <TableCell
                       style={{
                         color:
-                          product.status === "refund"
+                          product.status_id === 2
                             ? "#ffbb00"
                             : "white",
                         border: "1px solid #e0e0e0",
                         padding: "8px",
                         backgroundColor:
-                          product.status === "refund"
+                          product.status_id === 2
                             ? "#fff3d1"
                             : "white",
                         borderRadius: "5px",
@@ -758,9 +830,9 @@ function SalesDetailPage({ person }) {
                         fontWeight: "bold",
                       }}
                     >
-                      {product.status === "refund"
+                      {product.status_id === 2
                         ? "คืนสินค้า"
-                        : product.status}
+                        : product.status_id}
                     </TableCell>
 
                     <TableCell>
@@ -777,17 +849,29 @@ function SalesDetailPage({ person }) {
                     </TableCell>
                     <TableCell>
                       <Button
-                        onClick={() =>
-                          handleRemoveproduct(product.opid, product.order_id)
-                        }
+                        onClick={() => {
+                          setSelectedProductId(product.product_id);
+                          handleRemoveproduct(product.opid, product.order_id, refundNote);
+                          setRefundNote("");
+                        }}
                         variant="contained"
                         color="primary"
                         style={{ backgroundColor: '#3b50ce' }}
                       >
                         นำสินค้าออก
                       </Button>
-                    </TableCell>
 
+                    </TableCell>
+                    <TableCell>
+
+                    <TextField
+                      label="หมายเหตุ"
+                      variant="outlined"
+                      fullWidth
+                      margin="normal"
+                      onChange={(e) => setRefundNote(e.target.value)}
+                    />
+                    </TableCell>
 
                   </TableRow>
                 ))}
