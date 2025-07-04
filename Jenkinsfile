@@ -12,7 +12,7 @@ pipeline {
         // ----------------------
         stage('Clone') {
             steps {
-                git url: 'https://github.com/latthapholss/front-end-test.git', branch: 'main'
+                git url: 'https://github.com/latthapholss/front-pos.git', branch: 'main'
             }
         }
 
